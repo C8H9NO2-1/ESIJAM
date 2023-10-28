@@ -44,8 +44,14 @@ int main(int argc, char *argv[]){
 
     Mix_CloseAudio();
     Mix_Quit();
+
+
     SDL_DestroyWindow(window);
+
+    #ifndef __APPLE__
     IMG_Quit();
+    #endif
+    
     SDL_Quit();
 
     return retour;
