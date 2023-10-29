@@ -11,7 +11,7 @@ else
 		FLAGS = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2
 		SE = linux
 	endif
-	ifeq ($(UNAME_S), DARWIN)
+	ifeq ($(UNAME_S), Darwin)
 		FLAGS = -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer
 		SE=mac
 	endif

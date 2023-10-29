@@ -15,5 +15,6 @@
 
 #include "file.h"
 #include "parametre.h"
-
+#include "map.h"
+#include "texture_map.h"
 #endif
