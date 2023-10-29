@@ -29,6 +29,16 @@ struct Unite {
     Coordonnees coordonnees;
 };
 
+/**
+ * @brief Fonction qui permet le déplacement d'une unité
+ * 
+ * @param unite Unité à déplacer
+ * @param coordonnees Destination de l'unité
+ */
+void deplacementUnite(Unite *unite, Coordonnees coordonnees);
+
+void attaquerUnite(Unite *unite, Unite *cible);
+
 //========== Piège ==========
 typedef struct Piege Piege;
 struct Piege {
@@ -37,5 +47,8 @@ struct Piege {
     Coordonnees coordonnees;
 };
 
+void poserPiege(Piege *piege, Coordonnees coordonnees);
+
+void activerPiege(Piege *piege, Unite *unite);
 
 #endif
