@@ -27,9 +27,9 @@ int menuPrincipal(SDL_Window *window, parametre *para){
                 {
                   SDL_SetWindowTitle(window, "SUPER !!!");
                 }
-                else if(e.key.keysym.sym == SDLK_f){
-                  SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-                }
+                // else if(e.key.keysym.sym == SDLK_f){
+                //   SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+                // }
                 else if(e.key.keysym.sym == SDLK_g){
                   SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
                 }

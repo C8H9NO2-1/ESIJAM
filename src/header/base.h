@@ -15,5 +15,6 @@
 
 #include "file.h"
 #include "parametre.h"
+#include "entites.h"
 
 #endif
