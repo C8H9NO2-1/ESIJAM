@@ -1,4 +1,4 @@
-#ifndef __TEXTURE_MAP_H_
+#ifndef __TEXTURE_MAP_H__
 #define __TEXTURE_MAP_H__
 
 #include <SDL2/SDL.h>
@@ -9,6 +9,7 @@
 
 #define TAILLE_TEXTURE_MAP 32
 
-
+void chargeTextureMapTEMP(texture_map* tM, const char *fichier, SDL_Renderer *renderer);
+void freeTextureMap(texture_map* tM);
 
 #endif
