@@ -18,6 +18,15 @@ enum typeU{
 };
 typedef enum typeU typeU;
 
+struct texture_map
+{
+    SDL_Texture **textureSol;
+    int nbTextureSol;
+    SDL_Texture **textureMur;
+    int nbTextureMur;
+};
+typedef struct texture_map texture_map;
+
 void initMap(map *m, int l, int h);
 void modifCaseMap(map *m, int x, int y, typeU tU, char texture);
 void freeMap(map *m);

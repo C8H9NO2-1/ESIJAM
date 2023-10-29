@@ -29,7 +29,7 @@ int menuPrincipal(SDL_Window *window, parametre *para){
 
         /*SDL_Rect rectTemp = { 32, 32, TAILLE_TEXTURE_MAP-1, TAILLE_TEXTURE_MAP-1 };
         SDL_RenderCopy(renderer, tM.textureSol[0], NULL, &rectTemp);*/
-
+        afficheMap(&M, renderer, &tM);
         SDL_RenderPresent(renderer);
 
         SDL_Event e;
