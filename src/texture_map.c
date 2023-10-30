@@ -3,7 +3,7 @@
 
 void chargeTextureMapTEMP(texture_map* tM, const char *fichier, SDL_Renderer *renderer){
     SDL_Surface *asset_fichier = IMG_Load(fichier);
-    SDL_Surface *res = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0);
+    SDL_Surface *res = SDL_CreateRGBSurface(0, 31, 31, 32, 0, 0, 0, 0);
     tM->nbTextureMur = 2;
     tM->nbTextureSol = 1;
     tM->textureSol = (SDL_Texture**) malloc(sizeof(SDL_Texture*)*1);
@@ -12,13 +12,16 @@ void chargeTextureMapTEMP(texture_map* tM, const char *fichier, SDL_Renderer *re
     SDL_Rect dstRect = {0, 0, -1, -1};
     SDL_BlitSurface(asset_fichier, &rect, res, &dstRect);
     tM->textureMur[0] = SDL_CreateTextureFromSurface(renderer, res);
+    SDL_QueryTexture(tM->textureMur[0], NULL, NULL, &rect.w, &rect.h);
     rect.x = 33;
     SDL_BlitSurface(asset_fichier, &rect, res, &dstRect);
     tM->textureMur[1] = SDL_CreateTextureFromSurface(renderer, res);
+    SDL_QueryTexture(tM->textureMur[1], NULL, NULL, &rect.w, &rect.h);
     rect.x = 0;
     rect.y =33;
     SDL_BlitSurface(asset_fichier, &rect, res, &dstRect);
     tM->textureSol[0] = SDL_CreateTextureFromSurface(renderer, res);
+    SDL_QueryTexture(tM->textureSol[0], NULL, NULL, &rect.w, &rect.h);
 
     SDL_FreeSurface(asset_fichier);
     SDL_FreeSurface(res);

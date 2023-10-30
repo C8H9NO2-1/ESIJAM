@@ -12,9 +12,14 @@ int menuPrincipal(SDL_Window *window, parametre *para){
   texture_map tM;
   chargeTextureMapTEMP(&tM, "data/texture/murSol.png", renderer);
 
-  map M;
-  initMap(&M, 10, 10);
-
+  map *M;
+  M = generateurDeMap(51, 29, 24, 10, 14, 4, 10, 1000, 25114);
+  for(int j = 0; j < M->hauteur; j++){
+    for(int i = 0; i < M->largeur; i++){
+      printf("%d ", M->tab[i + j*M->largeur] && 1);
+    }
+    printf("\n");
+  }
 
 
 
@@ -29,7 +34,7 @@ int menuPrincipal(SDL_Window *window, parametre *para){
 
         /*SDL_Rect rectTemp = { 32, 32, TAILLE_TEXTURE_MAP-1, TAILLE_TEXTURE_MAP-1 };
         SDL_RenderCopy(renderer, tM.textureSol[0], NULL, &rectTemp);*/
-        afficheMap(&M, renderer, &tM);
+        afficheMap(M, renderer, &tM);
         SDL_RenderPresent(renderer);
 
         SDL_Event e;
@@ -63,7 +68,7 @@ int menuPrincipal(SDL_Window *window, parametre *para){
             SDL_Delay(1 /* ms */);
     }
 
-    freeMap(&M);
+    freeMap(M);
     freeTextureMap(&tM);
     SDL_DestroyRenderer(renderer);
     return 0;
