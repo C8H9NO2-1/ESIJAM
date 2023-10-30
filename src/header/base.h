@@ -16,5 +16,6 @@
 #include "file.h"
 #include "parametre.h"
 #include "entites.h"
+#include "texture_entites.h"
 
 #endif
