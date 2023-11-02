@@ -9,11 +9,18 @@ int menuPrincipal(SDL_Window *window, parametre *para){
 /*
 ==================================================Teste de chargement de map
 */
-  texture_map tM;
-  chargeTextureMapTEMP(&tM, "data/texture/murSol.png", renderer);
+
+  camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, 2., LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
+
+  texture_map* tM;
+  tM = chargeTextureMap("data/texture/murSolPlafond.png", renderer);
 
   map *M;
-  M = generateurDeMap(51, 29, 24, 10, 14, 4, 10, 1000, 25114);
+  //M = generateurDeMap(51, 29, 24, 10, 14, 4, 10, 1000, 25114, tM);
+  //M = generateurDeMap(51, 29, 24, 10, 14, 4, 10, 1000, 54, tM);
+  //M = generateurDeMap(51, 29, 24, 10, 14, 4, 10, 1000, 128, tM);
+  M = generateurDeMap(100, 56, 48, 20, 28, 8, 10, 1000, 315, tM);
+
   for(int j = 0; j < M->hauteur; j++){
     for(int i = 0; i < M->largeur; i++){
       printf("%d ", M->tab[i + j*M->largeur] && 1);
@@ -34,7 +41,8 @@ int menuPrincipal(SDL_Window *window, parametre *para){
 
         /*SDL_Rect rectTemp = { 32, 32, TAILLE_TEXTURE_MAP-1, TAILLE_TEXTURE_MAP-1 };
         SDL_RenderCopy(renderer, tM.textureSol[0], NULL, &rectTemp);*/
-        afficheMap(M, renderer, &tM);
+        //afficheMap(M, renderer, tM);
+        afficheMapCamera(&cam, M, renderer, tM);
         SDL_RenderPresent(renderer);
 
         SDL_Event e;
@@ -58,7 +66,10 @@ int menuPrincipal(SDL_Window *window, parametre *para){
                 else if(e.key.keysym.sym == SDLK_s){
                   SDL_SetWindowFullscreen(window, 0);
                 }
-                
+                else{
+                  controlCam(&cam, 16, 0.2, &e);
+                  //afficheMapCamera(&cam, M, renderer, tM);
+                }
                 
                 
             }
@@ -69,7 +80,7 @@ int menuPrincipal(SDL_Window *window, parametre *para){
     }
 
     freeMap(M);
-    freeTextureMap(&tM);
+    freeTextureMap(tM);
     SDL_DestroyRenderer(renderer);
     return 0;
 }

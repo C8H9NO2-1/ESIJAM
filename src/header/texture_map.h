@@ -11,10 +11,12 @@ struct texture_map
     int nbTextureSol;
     SDL_Texture **textureMur;
     int nbTextureMur;
+    SDL_Texture **texturePlafond;
+    int nbTexturePlafond;
 };
 typedef struct texture_map texture_map;
 
-void chargeTextureMapTEMP(texture_map* tM, const char *fichier, SDL_Renderer *renderer);
+texture_map* chargeTextureMap(const char *fichier, SDL_Renderer *renderer);
 void freeTextureMap(texture_map* tM);
 
 #endif

@@ -16,5 +16,7 @@
 #include "file.h"
 #include "parametre.h"
 #include "texture_map.h"
+#include "camera.h"
 #include "map.h"
+
 #endif
