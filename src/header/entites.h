@@ -79,7 +79,7 @@ void attaquerUnite(Unite *unite, Unite *cible);
 //========== Piège ==========
 typedef enum TypePiege TypePiege;
 enum TypePiege {
-    MUR, PIEGE2
+    PIEGE1, PIEGE2
 };
 
 typedef struct Piege Piege;
