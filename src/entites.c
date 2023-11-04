@@ -51,7 +51,7 @@ void detruirePiege(Piege *piege) {
 void afficherPiege(Piege *piege, SDL_Renderer *renderer, texture_piege *tP) {
     SDL_Rect rect = {0, 0, TAILLE_TEXTURE_PIEGE-1, TAILLE_TEXTURE_PIEGE-1};
     SDL_Rect dstRect = {piege->coordonnees.x, piege->coordonnees.y, -1, -1};
-    if (piege->typePiege == MUR) {
+    if (piege->typePiege == PIEGE1) {
         SDL_RenderCopy(renderer, tP->texturePiege1[0], &rect, &dstRect);
     } else {
         SDL_RenderCopy(renderer, tP->texturePiege2[1], &rect, &dstRect);
