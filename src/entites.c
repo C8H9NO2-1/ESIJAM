@@ -26,6 +26,12 @@ void afficherUnite(Unite *unite, SDL_Renderer *renderer, texture_unite *tU) {
     }
 }
 
+void attaquerUnite(Unite *unite, Unite *cible) {
+    if (unite->allegeance != cible->allegeance) {
+        cible->pointsVie -= unite->pointsAttaque;
+    }
+}
+
 //========== Piège ==========
 
 void initialiserPiege(Piege *piege, TypePiege typePiege, Coordonnees coordonnees) {
@@ -49,5 +55,12 @@ void afficherPiege(Piege *piege, SDL_Renderer *renderer, texture_piege *tP) {
         SDL_RenderCopy(renderer, tP->texturePiege1[0], &rect, &dstRect);
     } else {
         SDL_RenderCopy(renderer, tP->texturePiege2[1], &rect, &dstRect);
+    }
+}
+
+void activerPiege(Piege *piege, Unite *unite) {
+    if (unite->allegeance == ENNEMI) {
+        unite->pointsVie -= piege->degatsInfliges;
+        piege->durabilite--;
     }
 }

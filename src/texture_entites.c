@@ -26,11 +26,13 @@ void chargerTextureUnite(texture_unite *tU, const char *fichier, SDL_Renderer *r
     // On récupère le sprite de l'unité alliée
     SDL_BlitSurface(asset_fichier, &rect, res[0], &dstRect);
     tU->textureAmi[0] = SDL_CreateTextureFromSurface(renderer, res[0]);
+    SDL_QueryTexture(tU->textureAmi[0], NULL, NULL, &rect.w, &rect.h);
 
     // On récupère le sprite de l'unité ennemie
     rect.y = TAILLE_TEXTURE_UNITE + 1; // On se déplace dans le fichier avec tous les sprites
     SDL_BlitSurface(asset_fichier, &rect, res[1], &dstRect);
     tU->textureEnnemi[0] = SDL_CreateTextureFromSurface(renderer, res[1]);
+    SDL_QueryTexture(tU->textureEnnemi[0], NULL, NULL, &rect.w, &rect.h);
 
     // On libère les surfaces utilisées
     SDL_FreeSurface(asset_fichier);

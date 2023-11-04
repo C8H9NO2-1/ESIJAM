@@ -74,6 +74,12 @@ void afficherUnite(Unite *unite, SDL_Renderer *renderer, texture_unite *tU);
  */
 void deplacementUnite(Unite *unite, Coordonnees coordonnees);
 
+/**
+ * @brief Fonction qui inflige des dégâts à l'unité ciblée
+ * 
+ * @param unite Pointeur vers l'unité qui attaque
+ * @param cible Pointeur vers l'unité qui est attaquée
+ */
 void attaquerUnite(Unite *unite, Unite *cible);
 
 //========== Piège ==========
@@ -122,8 +128,12 @@ void detruirePiege(Piege *piege);
  */
 void afficherPiege(Piege *piege, SDL_Renderer *renderer, texture_piege *tP);
 
-void poserPiege(Piege *piege, Coordonnees coordonnees);
-
+/**
+ * @brief Fonction qui diminue les points de vie d'une unité ennemie et également la durabilité d'un piège
+ * 
+ * @param piege Pointeur vers le piège qui va être activé
+ * @param unite Pointeur vers l'unité ennemie qui va être attaquée
+ */
 void activerPiege(Piege *piege, Unite *unite);
 
 #endif
