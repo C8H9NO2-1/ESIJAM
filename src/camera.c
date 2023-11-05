@@ -23,16 +23,16 @@ void controlCam(camera* cam, float pas, float pasZoom, SDL_Event* e){
             break;
         case SDLK_KP_PLUS :
             if(cam->zoom + pasZoom <= ZOOM_MAX){
+                cam->x += (cam->w/4);//Calcul a refaire car pas terrible
+                cam->y += (cam->h/4);//Calcul a refaire car pas terrible
                 cam->zoom += pasZoom;
-                cam->x += (cam->w/2)/(cam->zoom*4);
-                cam->y += (cam->h/2)/(cam->zoom*4);
             }
             break;
         case SDLK_2:
             if(cam->zoom + pasZoom <= ZOOM_MAX){
+                cam->x += (cam->w/4);;//Calcul a refaire car pas terrible
+                cam->y += (cam->h/4);;//Calcul a refaire car pas terrible
                 cam->zoom += pasZoom;
-                cam->x += (cam->w/2)/(cam->zoom*4);
-                cam->y += (cam->h/2)/(cam->zoom*4);
             }
             break;
         case SDLK_KP_MINUS :
