@@ -1,97 +1,79 @@
 #include "header/base.h"
 
-void chargerTextureUnite(texture_unite *tU, const char *fichier, SDL_Renderer *renderer) {
-    // On récupère tous les sprites de l'unité
-    SDL_Surface *asset_fichier = IMG_Load(fichier);
+void chargerTextureEntite(texture_entite *tE, const char *fichierUnite, const char *fichierPiege, SDL_Renderer *renderer) {
+    // On récupère tous les sprites de l'entite
+    SDL_Surface *assetFichierUnite = IMG_Load(fichierUnite);
+    SDL_Surface *assetFichierPiege = IMG_Load(fichierPiege);
     // On crée des surfaces de la taille d'un sprite (une surface par sprite)
-    //? int nombreSurface = asset_fichier->w / TAILLE_TEXTURE_UNITE;
-    int nombreSurface = 2;
+    //? int nombreSurface = assetFichierUnite->w / TAILLE_TEXTURE_ENTITE + assetFichierPiege->w / TAILLE_TEXTURE_ENTITE;
+    int nombreSurface = 4;
     SDL_Surface **res = malloc(sizeof(SDL_Surface*) * nombreSurface);
-    // On crée les surfaces de façon à ce seulement une partie du sprite (l'unité) soit affichée
+    // On crée les surfaces de façon à ce seulement une partie du sprite (l'entité) soit affichée (on enlève les parties noires de la surface)
     for (int i = 0; i < nombreSurface; i++) {
         #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        res[i] = SDL_CreateRGBSurface(SDL_SWSURFACE,TAILLE_TEXTURE_UNITE,TAILLE_TEXTURE_UNITE, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+        res[i] = SDL_CreateRGBSurface(SDL_SWSURFACE,TAILLE_TEXTURE_ENTITE,TAILLE_TEXTURE_ENTITE, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
         #else
-        res[i] = SDL_CreateRGBSurface(SDL_SWSURFACE, TAILLE_TEXTURE_UNITE, TAILLE_TEXTURE_UNITE, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+        res[i] = SDL_CreateRGBSurface(SDL_SWSURFACE, TAILLE_TEXTURE_ENTITE, TAILLE_TEXTURE_ENTITE, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
         #endif
     }
     
-    tU->nbTextureAmi = 1;
-    tU->nbTextureEnnemi = 1;
-    tU->textureAmi = (SDL_Texture**) malloc(sizeof(SDL_Texture*) * tU->nbTextureAmi);
-    tU->textureEnnemi = (SDL_Texture**) malloc(sizeof(SDL_Texture*) * tU->nbTextureEnnemi);
-    SDL_Rect rect = {0, 0, TAILLE_TEXTURE_UNITE - 1, TAILLE_TEXTURE_UNITE - 1};
-    SDL_Rect dstRect = {0, 0, -1, -1};
-    
-    // On récupère le sprite de l'unité alliée
-    SDL_BlitSurface(asset_fichier, &rect, res[0], &dstRect);
-    tU->textureAmi[0] = SDL_CreateTextureFromSurface(renderer, res[0]);
-    SDL_QueryTexture(tU->textureAmi[0], NULL, NULL, &rect.w, &rect.h);
+    tE->nbTextureAmi = 1;
+    tE->textureAmi = (SDL_Texture**) malloc(sizeof(SDL_Texture*) * tE->nbTextureAmi);
 
-    // On récupère le sprite de l'unité ennemie
-    rect.y = TAILLE_TEXTURE_UNITE + 1; // On se déplace dans le fichier avec tous les sprites
-    SDL_BlitSurface(asset_fichier, &rect, res[1], &dstRect);
-    tU->textureEnnemi[0] = SDL_CreateTextureFromSurface(renderer, res[1]);
-    SDL_QueryTexture(tU->textureEnnemi[0], NULL, NULL, &rect.w, &rect.h);
+    tE->nbTextureEnnemi = 1;
+    tE->textureEnnemi = (SDL_Texture**) malloc(sizeof(SDL_Texture*) * tE->nbTextureEnnemi);
+
+    tE->nbTexturePiege1 = 1;
+    tE->texturePiege1 = (SDL_Texture**) malloc(sizeof(SDL_Texture*) * tE->nbTexturePiege1);
+
+    tE->nbTexturePiege2 = 1;
+    tE->texturePiege2  = (SDL_Texture**) malloc(sizeof(SDL_Texture*) * tE->nbTexturePiege2);
+
+    SDL_Rect rectUnite = {0, 0, TAILLE_TEXTURE_ENTITE - 1, TAILLE_TEXTURE_ENTITE - 1};
+    SDL_Rect dstRectUnite = {0, 0, -1, -1};
+
+    SDL_Rect rectPiege = {0, 0, TAILLE_TEXTURE_ENTITE - 1, TAILLE_TEXTURE_ENTITE - 1};
+    SDL_Rect dstRectPiege = {0, 0, -1, -1};
+    
+    // On récupère les sprite de l'unité alliée
+    SDL_BlitSurface(assetFichierUnite, &rectUnite, res[0], &dstRectUnite);
+    tE->textureAmi[0] = SDL_CreateTextureFromSurface(renderer, res[0]);
+    SDL_QueryTexture(tE->textureAmi[0], NULL, NULL, &rectUnite.w, &rectUnite.h);
+
+    // On récupère les sprite de l'unité ennemie
+    rectUnite.y = TAILLE_TEXTURE_ENTITE + 1; // On se déplace dans le fichier avec tous les sprites
+    SDL_BlitSurface(assetFichierUnite, &rectUnite, res[1], &dstRectUnite);
+    tE->textureEnnemi[0] = SDL_CreateTextureFromSurface(renderer, res[1]);
+    SDL_QueryTexture(tE->textureEnnemi[0], NULL, NULL, &rectUnite.w, &rectUnite.h);
+
+    // On récupère les sprite du piège 1
+    SDL_BlitSurface(assetFichierPiege, &rectPiege, res[2], &dstRectPiege);
+    tE->texturePiege1[0] = SDL_CreateTextureFromSurface(renderer, res[2]);
+    SDL_QueryTexture(tE->texturePiege1[0], NULL, NULL, &rectPiege.w, &rectPiege.h);
+
+    // On récupère les sprite du piège 2
+    rectPiege.y = TAILLE_TEXTURE_ENTITE + 1; // On se déplace dans le fichier avec tous les sprites
+    SDL_BlitSurface(assetFichierPiege, &rectPiege, res[3], &dstRectPiege);
+    tE->texturePiege2[0] = SDL_CreateTextureFromSurface(renderer, res[3]);
+    SDL_QueryTexture(tE->texturePiege2[0], NULL, NULL, &rectPiege.w, &rectPiege.h);
 
     // On libère les surfaces utilisées
-    SDL_FreeSurface(asset_fichier);
+    SDL_FreeSurface(assetFichierUnite);
+    SDL_FreeSurface(assetFichierPiege);
 
     for (int i = 0; i < nombreSurface; i++) {
         SDL_FreeSurface(res[i]);
     }
 }
 
-void detruireTextureUnite(texture_unite *tU) {
-    free(tU->textureAmi);
-    free(tU->textureEnnemi);
-    tU->nbTextureAmi = -1;
-    tU->nbTextureEnnemi = -1;
-}
+void detruireTextureEntite(texture_entite *tE) {
+    free(tE->textureAmi);
+    free(tE->textureEnnemi);
+    free(tE->texturePiege1);
+    free(tE->texturePiege2);
 
-void chargerTexturePiege(texture_piege *tP, const char *fichier, SDL_Renderer *renderer) {
-    // On récupère tous les sprites de l'unité
-    SDL_Surface *asset_fichier = IMG_Load(fichier);
-    // On crée des surfaces de la taille d'un sprite (une surface par sprite)
-    //? int nombreSurface = asset_fichier->w / TAILLE_TEXTURE_UNITE;
-    int nombreSurface = 2;
-    SDL_Surface **res = malloc(sizeof(SDL_Surface*) * nombreSurface);
-    // On crée les surfaces de façon à ce seulement une partie du sprite (l'unité) soit affichée
-    for (int i = 0; i < nombreSurface; i++) {
-        #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        res[i] = SDL_CreateRGBSurface(SDL_SWSURFACE,TAILLE_TEXTURE_PIEGE,TAILLE_TEXTURE_PIEGE, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
-        #else
-        res[i] = SDL_CreateRGBSurface(SDL_SWSURFACE, TAILLE_TEXTURE_PIEGE, TAILLE_TEXTURE_PIEGE, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
-        #endif
-    }
-    
-    tP->nbTexturePiege1 = 1;
-    tP->nbTexturePiege2 = 1;
-    tP->texturePiege1 = (SDL_Texture**) malloc(sizeof(SDL_Texture*) * tP->nbTexturePiege1);
-    tP->texturePiege2 = (SDL_Texture**) malloc(sizeof(SDL_Texture*) * tP->nbTexturePiege2);
-    SDL_Rect rect = {0, 0, TAILLE_TEXTURE_PIEGE - 1, TAILLE_TEXTURE_PIEGE - 1};
-    SDL_Rect dstRect = {0, 0, -1, -1};
-    
-    // On récupère le sprite de l'unité alliée
-    SDL_BlitSurface(asset_fichier, &rect, res[0], &dstRect);
-    tP->texturePiege1[0] = SDL_CreateTextureFromSurface(renderer, res[0]);
-
-    // On récupère le sprite de l'unité ennemie
-    rect.y = TAILLE_TEXTURE_PIEGE + 1; // On se déplace dans le fichier avec tous les sprites
-    SDL_BlitSurface(asset_fichier, &rect, res[1], &dstRect);
-    tP->texturePiege2[0] = SDL_CreateTextureFromSurface(renderer, res[1]);
-
-    // On libère les surfaces utilisées
-    SDL_FreeSurface(asset_fichier);
-
-    for (int i = 0; i < nombreSurface; i++) {
-        SDL_FreeSurface(res[i]);
-    }
-}
-
-void detruireTexturePiege(texture_piege *tP) {
-    free(tP->texturePiege1);
-    free(tP->texturePiege2);
-    tP->nbTexturePiege1 = -1;
-    tP->nbTexturePiege2 = -1;
+    tE->nbTextureAmi = -1;
+    tE->nbTextureEnnemi = -1;
+    tE->nbTexturePiege1 = -1;
+    tE->nbTexturePiege2 = -1;
 }

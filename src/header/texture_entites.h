@@ -7,39 +7,25 @@
 
 #include "base.h"
 
-#define TAILLE_TEXTURE_UNITE 32
-#define TAILLE_TEXTURE_PIEGE 32
+#define TAILLE_TEXTURE_ENTITE 32
+
+// #define TAILLE_TEXTURE_UNITE 32
+// #define TAILLE_TEXTURE_PIEGE 32
 
 /**
- * @brief Fonction qui permet de charger toutes les textures des unités
+ * @brief Fonction qui permet de charger toutes les textures des entités
  * 
- * @param tU Pointeur vers la structure contenant les textures des unités
- * @param fichier Fichier contenant toutes les textures des unités
+ * @param tU Pointeur vers la structure contenant les textures des entitèr
+ * @param fichier Fichier contenant toutes les textures des entitès
  * @param renderer Pointeur vers le renderer
  */
-void chargerTextureUnite(texture_unite *tU, const char *fichier, SDL_Renderer *renderer);
+void chargerTextureEntite(texture_entite *tE, const char *fichierUnite, const char *fichierPiege, SDL_Renderer *renderer); //! Il sera peut être nécessaire de passer un seul fichier en paramètre, dépendant de comment Tym fait les fichiers
 
 /**
- * @brief Fonction qui permet de détruire toutes les textures des unités
+ * @brief Fonction qui permet de détruire toutes les textures des entités
  * 
- * @param tU Pointeur vers la structure contenant les textures des unités
+ * @param tE Pointeur vers la structure contenant les textures des entités
  */
-void detruireTextureUnite(texture_unite *tU);
-
-/**
- * @brief Fonction qui permet de charger toutes les textures des pièges
- * 
- * @param tP Pointeur vers la structure contenant les textures des pièges
- * @param fichier Fichier contenant toutes les textures des pièges
- * @param renderer Pointeur vers le renderer
- */
-void chargerTexturePiege(texture_piege *tP, const char *fichier, SDL_Renderer *renderer);
-
-/**
- * @brief Fonction qui permet de détruire toutes les textures des pièges
- * 
- * @param tP Pointeur vers la structure contenant les textures des pièges
- */
-void detruireTexturePiege(texture_piege *tP);
+void detruireTextureEntite(texture_entite *tE);
 
 #endif

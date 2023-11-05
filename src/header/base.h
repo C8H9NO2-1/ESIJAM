@@ -13,12 +13,12 @@
 #include <stdio.h>
 
 
+#include "texture_map.h"
+#include "camera.h"
+#include "map.h"
 #include "file.h"
 #include "parametre.h"
 #include "entites.h"
 #include "texture_entites.h"
-#include "texture_map.h"
-#include "camera.h"
-#include "map.h"
 
 #endif
