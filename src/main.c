@@ -1,4 +1,6 @@
 #include "header/base.h"
+
+#include "header/parametre.h"
 #include "header/fenetre_menu_principal.h"
 /*
 Liste des erreurs :

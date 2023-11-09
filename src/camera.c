@@ -1,5 +1,7 @@
 #include "header/base.h"
 
+#include "header/camera.h"
+
 camera initCamera(float x, float y, float zoom, int w, int h){
     camera cam ={x, y, zoom, w, h};
     return cam;

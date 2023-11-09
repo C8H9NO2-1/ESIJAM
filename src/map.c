@@ -1,5 +1,10 @@
 #include "header/base.h"
 
+#include "header/texture_map.h"
+#include "header/camera.h"
+#include "header/map.h"
+#include "header/camera.h"
+
 map* initMap(int l, int h){
     map *m = malloc(sizeof(map));
     int nbCase = l*h;

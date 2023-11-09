@@ -4,8 +4,6 @@
 #ifndef __PARAMETRE_H__
 #define __PARAMETRE_H__
 
-#include <SDL2/SDL.h>
-
 //Format 16:9 des fenetres
 #define LARGEUR 16
 #define HAUTEUR 9

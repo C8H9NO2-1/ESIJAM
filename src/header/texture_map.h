@@ -1,8 +1,6 @@
 #ifndef __TEXTURE_MAP_H__
 #define __TEXTURE_MAP_H__
 
-#include "base.h"
-
 #define TAILLE_TEXTURE_MAP 32
 
 struct texture_map

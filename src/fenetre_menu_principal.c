@@ -1,5 +1,12 @@
 #include "header/base.h"
+
 #include "header/texture_map.h"
+#include "header/camera.h"
+#include "header/map.h"
+#include "header/parametre.h"
+#include "header/entites.h"
+#include "header/texture_entites.h"
+#include "header/graphe.h"
 
 int menuPrincipal(SDL_Window *window, parametre *para){
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -59,6 +66,8 @@ int menuPrincipal(SDL_Window *window, parametre *para){
             SDL_Delay(1 /* ms */);
     }
 
+    // freeListeEntite(listeEntite);
+    // freeMatriceAdjacence(matrice, *M);
     freeMap(M);
     freeTextureMap(tM);
     SDL_DestroyRenderer(renderer);

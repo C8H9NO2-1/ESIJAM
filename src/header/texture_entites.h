@@ -5,8 +5,6 @@
 #ifndef __TEXTURE_ENTITES_H__
 #define __TEXTURE_ENTITES_H__
 
-#include "base.h"
-
 #define TAILLE_TEXTURE_ENTITE 32
 
 // #define TAILLE_TEXTURE_UNITE 32

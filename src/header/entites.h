@@ -5,12 +5,13 @@
 #ifndef __ENTITE_H__
 #define __ENTITE_H__
 
-#include "base.h"
-
 #define POINTS_DE_VIE_INITIAUX 100
 #define POINTS_ATTAQUE 10
 #define DURABILITE_PIEGE 10
 #define DEGATS_INFLIGES 10
+
+#define WIDTH_MAP 100
+#define HEIGHT_MAP 56
 
 //========== Coordonnées ==========
 typedef struct Coordonnees Coordonnees;
@@ -18,8 +19,26 @@ struct Coordonnees {
     int x;
     int y;
 };
-//!==============================================================================================================================
-//!========== Test entité ==========
+
+/**
+ * @brief Fonction qui renvoie l'indice du minimum d'un tableau
+ * 
+ * @param tab Tableau de flottants
+ * @param taille Taille de tab
+ * @return int Indice du minimum de tab
+ */
+int minTableau(float *tab, int taille);
+
+/**
+ * @brief Fonction qui permet de calculer la distance entre deux coordonnées
+ * 
+ * @param c1 Première coordonnée
+ * @param c2 Deuxième coordonnée
+ * @return float Distance entre c1 et c2
+ */
+float distance(Coordonnees c1, Coordonnees c2);
+
+//========== Entité ==========
 typedef enum Allegeance Allegeance;
 enum Allegeance {
     AMI, ENNEMI
@@ -54,6 +73,22 @@ struct texture_entite {
     int nbTexturePiege2; // À priori égal à nbTexturePiege1
 };
 
+// Dans la première case du dernier tableau on met les unités et dans la deuxième les pièges
+typedef struct ListeEntite ListeEntite;
+struct ListeEntite {
+    // Entite *entites[WIDTH_MAP][HEIGHT_MAP][2];
+    Entite ****entites;
+};
+
+/**
+ * @brief Fonction qui permet d'initialiser une liste d'entités
+ * 
+ * @param listeEntite Pointeur vers la liste d'entités à initialiser
+ */
+ListeEntite* initialiserListeEntite();
+
+void freeListeEntite(ListeEntite *listeEntite);
+
 /**
  * @brief Fonction qui permet d'initialiser une entité
  * 
@@ -61,15 +96,16 @@ struct texture_entite {
  * @param allegeance Allégeance de l'entité (AMI ou ENNEMI), pour un piège cette variable vaut AMI
  * @param typeEntite Type de l'entité (UNITE, PIEGE1 ou PIEGE2)
  * @param coordonnees Coordonnées initiales de l'entité
+ * @param listeEntite Pointeur vers la liste des entités
  */
-void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees);
+void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite);
 
 /**
  * @brief Fonction qui permet de détruire une entité
  * 
  * @param entite Pointeur vers l'entité à détruire
  */
-void detruireEntite(Entite *entite);
+void detruireEntite(Entite *entite, ListeEntite *listeEntite);
 
 /**
  * @brief Fonction qui permet d'afficher une entité
@@ -78,7 +114,7 @@ void detruireEntite(Entite *entite);
  * @param renderer Pointeur vers le renderer
  * @param tE Pointeur vers les textures des entités
  */
-void afficherEntite(Entite *entite, SDL_Renderer *renderer, texture_entite *tE);
+void afficherEntite(Entite *entite, SDL_Renderer *renderer, texture_entite *tE); //! Cette fonction devra être modifiée une fois que Tym aura fini les textures
 
 /**
  * @brief Fonction qui permet le déplacement d'une entité
@@ -87,7 +123,7 @@ void afficherEntite(Entite *entite, SDL_Renderer *renderer, texture_entite *tE);
  * @param coordonnees Destination de l'entite
  * @param m Pointeur vers la carte
  */
-void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m);
+void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m, ListeEntite *listeEntite);
 
 /**
  * @brief Fonction qui inflige des dégâts à l'entité ciblée
@@ -97,8 +133,7 @@ void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m);
  */
 void attaquerEntite(Entite *entite, Entite *cible);
 
-//!========== Fin Test ==========
-//!==============================================================================================================================
+//========== Fin Entité ==========
 
 // //========== Unité ==========
 

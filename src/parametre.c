@@ -1,5 +1,8 @@
 #include "header/base.h"
 
+#include "header/file.h"
+#include "header/parametre.h"
+
 parametre recupererParametre(){
     /*Les parametres sont enregistres dans le fichier data/jeu.config
     Les fichiers contient les donnees ligne par ligne dans l'ordre suivant :
