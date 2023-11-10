@@ -1,5 +1,9 @@
 #include "header/base.h"
 
+#include "header/texture_map.h"
+#include "header/camera.h"
+#include "header/map.h"
+
 texture_map* chargeTextureMap(const char *fichier, SDL_Renderer *renderer){
     texture_map* tM = malloc(sizeof(texture_map));
     SDL_Surface *asset_fichier = IMG_Load(fichier);

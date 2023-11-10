@@ -1,5 +1,13 @@
 #include "header/base.h"
 
+#include "header/texture_map.h"
+#include "header/camera.h"
+#include "header/map.h"
+#include "header/entites.h"
+#include "header/texture_entites.h"
+
+// #include "header/base.h"
+
 void chargerTextureEntite(texture_entite *tE, const char *fichierUnite, const char *fichierPiege, SDL_Renderer *renderer) {
     // On récupère tous les sprites de l'entite
     SDL_Surface *assetFichierUnite = IMG_Load(fichierUnite);

@@ -1,8 +1,75 @@
 #include "header/base.h"
 
-//1========== Entité ==========
+#include "header/texture_map.h"
+#include "header/camera.h"
+#include "header/map.h"
+#include "header/entites.h"
+#include "header/texture_entites.h"
 
-void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees) {
+//========== Coordonnées ==========
+
+int minTableau(float *tab, int taille) {
+    int i = 0;
+    float min = tab[0];
+
+    for (int j = 0; j < taille; j++) {
+        if (tab[j] < min) {
+            min = tab[j];
+            i = j;
+        }
+    }
+
+    return i;
+}
+
+//========== Entité ==========
+
+ListeEntite* initialiserListeEntite() {
+    ListeEntite *listeEntite = (ListeEntite *) malloc(sizeof(ListeEntite));
+
+    listeEntite->entites = (Entite ****) malloc(sizeof(Entite ***) * WIDTH_MAP);
+
+    for (int i = 0; i < WIDTH_MAP; i++) {
+        listeEntite->entites[i] = (Entite ***) malloc(sizeof(Entite **) * HEIGHT_MAP);
+    }
+    for (int i = 0; i < WIDTH_MAP; i++) {
+        for (int j = 0; j < HEIGHT_MAP; j++) {
+            listeEntite->entites[i][j] = (Entite **) malloc(sizeof(Entite *) * 2);
+        }
+    }
+
+    // On déclare une entitée vide dans chaque case
+    Entite *entiteVide = (Entite *) malloc(sizeof(Entite));
+    entiteVide->pointsVie = -1;
+    entiteVide->pointsAttaque = -1;
+    entiteVide->allegeance = -1;
+    entiteVide->typeEntite = -1;
+    entiteVide->coordonnees = (Coordonnees) {-1, -1};
+
+    for (int i = 0; i < WIDTH_MAP; i++) {
+        for (int j = 0; j < HEIGHT_MAP; j++) {
+            listeEntite->entites[i][j][0] = entiteVide;
+            listeEntite->entites[i][j][1] = entiteVide;
+        }
+    }
+
+    return listeEntite;
+}
+
+void freeListeEntite(ListeEntite *listeEntite) {
+    for (int i = 0; i < WIDTH_MAP; i++) {
+        for (int j = 0; j < HEIGHT_MAP; j++) {
+            free(listeEntite->entites[i][j]);
+        }
+    }
+    for (int i = 0; i < WIDTH_MAP; i++) {
+        free(listeEntite->entites[i]);
+    }
+    free(listeEntite->entites);
+    free(listeEntite);
+}
+
+void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite) {
     // On initialise les variables qui ne dépendent pas du type d'entite avec lequel on travaille
     entite->coordonnees = coordonnees;
     entite->typeEntite = typeEntite;
@@ -12,14 +79,25 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
         entite->pointsVie = POINTS_DE_VIE_INITIAUX;
         entite->pointsAttaque = POINTS_ATTAQUE;
         entite->allegeance = allegeance;
+
+        listeEntite->entites[coordonnees.x][coordonnees.y][0] = entite;
+
     } else { // Si l'entite est un piege
         entite->pointsVie = DURABILITE_PIEGE;
         entite->pointsAttaque = DEGATS_INFLIGES;
         entite->allegeance = AMI;
+
+        listeEntite->entites[coordonnees.x][coordonnees.y][1] = entite;
     }
 }
 
-void detruireEntite(Entite *entite) {
+void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
+    if (entite->typeEntite == UNITE) {
+        listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][0] = NULL;
+    } else {
+        listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][1] = NULL;
+    }
+
     entite->pointsVie = -1;
     entite->pointsAttaque = -1;
     entite->allegeance = -1;
@@ -47,6 +125,11 @@ void afficherEntite(Entite *entite, SDL_Renderer *renderer, texture_entite *tE) 
         break;
     default:
         break;
+    }
+}
+
+void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m, ListeEntite *listeEntite) {
+    if (entite->typeEntite == UNITE) {
     }
 }
 

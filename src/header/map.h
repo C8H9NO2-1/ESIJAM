@@ -1,7 +1,5 @@
 #ifndef __MAP_H__
 #define __MAP_H__
-#include <stdint.h>
-#include "base.h"
 
 typedef uint8_t uMap;
 
