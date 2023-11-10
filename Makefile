@@ -3,7 +3,7 @@ SRC= $(notdir $(wildcard src/*.c))
 
 ifeq ($(OS), Windows_NT)
 	SE = win
-	FLAGS = -I include -L lib -lmingw32 -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2
+	FLAGS = -I include -L lib -lmingw32 -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2 -pthread
 	clr = echo Non implementer sur windows
 else
 	UNAME_S := $(shell uname -s)

@@ -235,14 +235,14 @@ typeU* generateurDePseudoMap(int w, int h, int xBase, int yBase, int wBase, int 
 }
 
 typeU* doubleMap(typeU* map, int w, int h){//Prend une pseudo map et double sa largeur et sa hauteur
-    typeU* pM = malloc(sizeof(typeU)*w*h);
+    typeU* pM = malloc(sizeof(typeU)*w*h*4);
 
-    for(int j = 0; j < h/2; j++){
-        for(int i = 0; i < w/2; i++){
-            pM[i*2 + (j*2)*w] = map[i + j*w/2];
-            pM[i*2+1 + (j*2)*w] = map[i + j*w/2];
-            pM[i*2 + (j*2+1)*w] = map[i + j*w/2];
-            pM[i*2+1 + (j*2+1)*w] = map[i + j*w/2];
+    for(int j = 0; j < h; j++){
+        for(int i = 0; i < w; i++){
+            pM[i*2 + (j*2)*w*2] = map[i + j*w];
+            pM[i*2+1 + (j*2)*w*2] = map[i + j*w];
+            pM[i*2 + (j*2+1)*w*2] = map[i + j*w];
+            pM[i*2+1 + (j*2+1)*w*2] = map[i + j*w];
         }
     }
     return pM;
@@ -344,4 +344,50 @@ map* generateurDeMap(int w, int h, int xBase, int yBase, int wBase, int hBase, i
     free(pM);
     return m;
 
+}
+
+map* lecturePseudoMap(const char* nom_fichier, texture_map* tM, int seed){
+    FILE *fichier = fopen(nom_fichier, "r");
+    if(fichier == NULL) exit(57468);
+    //Determination de w et h
+    char c = 0;
+    int w = -1;
+    int h = 0;
+    while (c != EOF)
+    {
+        int i = 0;
+        c =fgetc(fichier);
+        while (c != EOF && c != '\n')
+        {
+            c = fgetc(fichier);
+            if (c != 13)
+                i++;
+        }
+        if(w == -1)
+            w = i;
+        else if (w != i && i != 0) exit(564);
+        if(i != 0)
+            h++;
+        
+    }
+    if(w == -1 || h == 0) exit(548);
+
+    fseek(fichier, 0, SEEK_SET);
+    typeU* pseudoMap = (typeU*) malloc(sizeof(typeU)*w*h);
+    for(int j = 0; j < h; j++){
+        for(int i = 0; i < w; i++){
+            pseudoMap[i + j*w] = fgetc(fichier)-'0';
+        }
+        if(fgetc(fichier) == 13) fgetc(fichier);
+    }
+    typeU* pseudoMap2 = doubleMap(pseudoMap, w, h);
+    free(pseudoMap);
+    w *= 2;
+    h *= 2;
+    ajoutMur(pseudoMap2, w, h);
+
+    map* m = pseudoMapToMap(pseudoMap2, tM, w, h, seed);
+    free(pseudoMap2);    
+    fclose(fichier);
+    return m;
 }
