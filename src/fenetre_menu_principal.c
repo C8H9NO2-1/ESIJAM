@@ -11,7 +11,8 @@
 int menuPrincipal(SDL_Window *window, parametre *para){
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool running = true;
-    //float time = 0;
+    float time = 0;
+    float delta_time = 0;
 
   camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, 2., LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
 
@@ -19,11 +20,12 @@ int menuPrincipal(SDL_Window *window, parametre *para){
   tM = chargeTextureMap("data/texture/murSolPlafond.png", renderer);
 
   map *M;
-  M = generateurDeMap(100, 56, 48, 20, 28, 8, 10, 1000, 315, tM);
+  M = lecturePseudoMap("data/map/pseudoMap1.pm", tM, 586);
 
     while(running) {
         Uint64 frame_start = SDL_GetTicks64();
-        //time = (float)frame_start / 1000;
+        delta_time = (((float) frame_start)/1000) - time;
+        time = (float)frame_start / 1000;
 
         //Fond noir
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0x00);
@@ -55,7 +57,7 @@ int menuPrincipal(SDL_Window *window, parametre *para){
                   SDL_SetWindowFullscreen(window, 0);
                 }
                 else{
-                  controlCam(&cam, 16, 0.2, &e);
+                  controlCam(&cam, 5000, 3, &e, delta_time);
                 }
                 
                 
