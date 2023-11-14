@@ -85,9 +85,9 @@ struct ListeEntite {
  * 
  * @param listeEntite Pointeur vers la liste d'entités à initialiser
  */
-ListeEntite* initialiserListeEntite();
+ListeEntite* initialiserListeEntite(map m);
 
-void freeListeEntite(ListeEntite *listeEntite);
+void freeListeEntite(ListeEntite *listeEntite, map m);
 
 /**
  * @brief Fonction qui permet d'initialiser une entité

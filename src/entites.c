@@ -5,6 +5,7 @@
 #include "header/map.h"
 #include "header/entites.h"
 #include "header/texture_entites.h"
+#include "header/graphe.h"
 
 //========== Coordonnées ==========
 
@@ -24,16 +25,16 @@ int minTableau(float *tab, int taille) {
 
 //========== Entité ==========
 
-ListeEntite* initialiserListeEntite() {
+ListeEntite* initialiserListeEntite(map m) {
     ListeEntite *listeEntite = (ListeEntite *) malloc(sizeof(ListeEntite));
 
-    listeEntite->entites = (Entite ****) malloc(sizeof(Entite ***) * WIDTH_MAP);
+    listeEntite->entites = (Entite ****) malloc(sizeof(Entite ***) * m.largeur);
 
-    for (int i = 0; i < WIDTH_MAP; i++) {
-        listeEntite->entites[i] = (Entite ***) malloc(sizeof(Entite **) * HEIGHT_MAP);
+    for (int i = 0; i < m.largeur; i++) {
+        listeEntite->entites[i] = (Entite ***) malloc(sizeof(Entite **) * m.hauteur);
     }
-    for (int i = 0; i < WIDTH_MAP; i++) {
-        for (int j = 0; j < HEIGHT_MAP; j++) {
+    for (int i = 0; i < m.largeur; i++) {
+        for (int j = 0; j < m.hauteur; j++) {
             listeEntite->entites[i][j] = (Entite **) malloc(sizeof(Entite *) * 2);
         }
     }
@@ -46,8 +47,8 @@ ListeEntite* initialiserListeEntite() {
     entiteVide->typeEntite = -1;
     entiteVide->coordonnees = (Coordonnees) {-1, -1};
 
-    for (int i = 0; i < WIDTH_MAP; i++) {
-        for (int j = 0; j < HEIGHT_MAP; j++) {
+    for (int i = 0; i < m.largeur; i++) {
+        for (int j = 0; j < m.hauteur; j++) {
             listeEntite->entites[i][j][0] = entiteVide;
             listeEntite->entites[i][j][1] = entiteVide;
         }
@@ -56,13 +57,13 @@ ListeEntite* initialiserListeEntite() {
     return listeEntite;
 }
 
-void freeListeEntite(ListeEntite *listeEntite) {
-    for (int i = 0; i < WIDTH_MAP; i++) {
-        for (int j = 0; j < HEIGHT_MAP; j++) {
+void freeListeEntite(ListeEntite *listeEntite, map m) {
+    for (int i = 0; i < m.largeur; i++) {
+        for (int j = 0; j < m.hauteur; j++) {
             free(listeEntite->entites[i][j]);
         }
     }
-    for (int i = 0; i < WIDTH_MAP; i++) {
+    for (int i = 0; i < m.largeur; i++) {
         free(listeEntite->entites[i]);
     }
     free(listeEntite->entites);
@@ -130,6 +131,7 @@ void afficherEntite(Entite *entite, SDL_Renderer *renderer, texture_entite *tE) 
 
 void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m, ListeEntite *listeEntite) {
     if (entite->typeEntite == UNITE) {
+
     }
 }
 

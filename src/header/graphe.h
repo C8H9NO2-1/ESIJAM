@@ -20,14 +20,21 @@ int identifiantCase(Coordonnees tuile, map m);
  */
 int heuristique(Coordonnees tuile, Coordonnees arrivee);
 
+struct Graphe {
+    int** matriceAdjacenceEnemi1;
+    int** matriceAdjacenceEnemi2; // Cette matrice est la même que celle de l'enemi 1 sauf que l'on ne tient pas compte des murs cassables
+    int** matriceAdjacenceAllie;
+};
+typedef struct Graphe Graphe;
+
 /**
- * @brief Fonction qui calcule la matrice d'adjacence du graphe de la map
+ * @brief Fonction qui calcule les différentes matrices d'adjacences du graphe de la map
  * 
- * @param m Map dont on calcule la matrice d'adjacence
+ * @param m Map dont on calcule les matrices d'adjacences
  * @param listeEntite Liste des entités de la map
- * @return int** Matrice d'adjacence
+ * @return Graphe Matrices d'adjacences
  */
-int** matriceAdjacence(map m, ListeEntite *listeEntite);
+Graphe matriceAdjacences(map m, ListeEntite *listeEntite);
 
 /**
  * @brief Détruit la matrice d'adjacence
