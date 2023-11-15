@@ -42,8 +42,8 @@ int main(int argc, char *argv[]){
             break;
         }
     }
-    Mix_HaltMusic();
 
+    Mix_HaltMusic();
     Mix_CloseAudio();
     Mix_Quit();
 

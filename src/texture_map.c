@@ -55,10 +55,21 @@ texture_map* chargeTextureMap(const char *fichier, SDL_Renderer *renderer){
     tM->textureMur[13] = SDL_CreateTextureFromSurface(renderer, res);
     SDL_QueryTexture(tM->textureMur[13], NULL, NULL, &rect.w, &rect.h);
 
+    SDL_FreeSurface(res);
+    SDL_FreeSurface(asset_fichier);
     return tM;
 }
 
 void freeTextureMap(texture_map* tM){
+    for(int i = 0; i < tM->nbTextureMur; i++){
+        SDL_DestroyTexture(tM->textureMur[i]);
+    }
+    for(int i = 0; i < tM->nbTexturePlafond; i++){
+        SDL_DestroyTexture(tM->texturePlafond[i]);
+    }
+    for(int i = 0; i < tM->nbTextureSol; i++){
+        SDL_DestroyTexture(tM->textureSol[i]);
+    }
     free(tM->textureMur);
     free(tM->textureSol);
     free(tM->texturePlafond);

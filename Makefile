@@ -8,11 +8,11 @@ ifeq ($(OS), Windows_NT)
 else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S), Linux)
-		FLAGS = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2
+		FLAGS = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2 -pthread -lm -fsanitize=address
 		SE = linux
 	endif
 	ifeq ($(UNAME_S), Darwin)
-		FLAGS = -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer
+		FLAGS = -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer -pthread
 		SE=mac
 	endif
 	clr = rm bin/$(SE)/*.o && echo Tout les fichiers binaires ont ete supprimes
