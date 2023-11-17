@@ -29,15 +29,6 @@ struct Coordonnees {
  */
 int minTableau(float *tab, int taille);
 
-/**
- * @brief Fonction qui permet de calculer la distance entre deux coordonnées
- * 
- * @param c1 Première coordonnée
- * @param c2 Deuxième coordonnée
- * @return float Distance entre c1 et c2
- */
-float distance(Coordonnees c1, Coordonnees c2);
-
 //========== Entité ==========
 typedef enum Allegeance Allegeance;
 enum Allegeance {

@@ -61,8 +61,45 @@ int menuPrincipal(SDL_Window *window, parametre *para){
   texture_map* tM;
   tM = chargeTextureMap("data/texture/murSolPlafond.png", renderer);
 
-  map *M;
-  M = lecturePseudoMap("data/map/pseudoMap1.pm", tM, 586);
+    map *M;
+    M = lecturePseudoMap("data/map/pseudoMap1.pm", tM, 586);
+
+    //!========== Code de Test ==========
+
+    ListeEntite *listeEntite = initialiserListeEntite(*M);
+
+    Graphe graphe = matriceAdjacences(*M, listeEntite);
+
+    int nbreLigne = (M->hauteur * M->largeur) / 4;
+
+    printf("%d\n", nbreLigne);
+    SDL_Delay(1000);
+
+    for (int i = 0; i < nbreLigne; i++) {
+        for (int j = 0; j < nbreLigne; j++) {
+            printf("%d ", graphe.matriceAdjacenceEnemi1[i][j]);
+        }
+        printf("\n");
+    }
+
+    // printf("Fin de l'affichage de la matrice\n");
+
+    // Coordonnees depart = {M->largeur / 4, 0};
+    // Coordonnees arrivee = {M->largeur / 4, M->largeur / 4};
+
+    // printf("Départ: x = %d / y = %d\n", depart.x, depart.y);
+    // printf("Arrivée: x = %d / y = %d\n", arrivee.x, arrivee.y);
+
+    ListeCheminsEnnemis *listeCheminsEnnemis = calculeCheminsEnnemis(graphe, *M);
+
+    ElementCheminEnnemi *element = listeCheminsEnnemis->chemin1->premier;
+
+    while (element->caseSuivante != NULL) {
+      printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
+      element = element->caseSuivante;
+    }
+
+    //!========== Fin du Test ==========
 
   float zoomMin = zoomMinDetermination(M, para);
 
@@ -71,6 +108,7 @@ int menuPrincipal(SDL_Window *window, parametre *para){
   argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin};
   pthread_t threadVideo;
   pthread_create(&threadVideo, NULL, afficheVideo, &arg);
+  
 
   SDL_Event e;
   while(running){
@@ -104,6 +142,7 @@ int menuPrincipal(SDL_Window *window, parametre *para){
     default:
       break;
     }
+
     }
     //Attente de fin d'execution du second thread
     while(fin != true) SDL_Delay(50);

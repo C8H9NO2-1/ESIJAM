@@ -26,15 +26,18 @@ int minTableau(float *tab, int taille) {
 //========== Entité ==========
 
 ListeEntite* initialiserListeEntite(map m) {
+    int largeur = m.largeur / 2;
+    int hauteur = m.hauteur / 2;
+
     ListeEntite *listeEntite = (ListeEntite *) malloc(sizeof(ListeEntite));
 
-    listeEntite->entites = (Entite ****) malloc(sizeof(Entite ***) * m.largeur);
+    listeEntite->entites = (Entite ****) malloc(sizeof(Entite ***) * largeur);
 
-    for (int i = 0; i < m.largeur; i++) {
-        listeEntite->entites[i] = (Entite ***) malloc(sizeof(Entite **) * m.hauteur);
+    for (int i = 0; i < largeur; i++) {
+        listeEntite->entites[i] = (Entite ***) malloc(sizeof(Entite **) * hauteur);
     }
-    for (int i = 0; i < m.largeur; i++) {
-        for (int j = 0; j < m.hauteur; j++) {
+    for (int i = 0; i < largeur; i++) {
+        for (int j = 0; j < hauteur; j++) {
             listeEntite->entites[i][j] = (Entite **) malloc(sizeof(Entite *) * 2);
         }
     }
@@ -47,8 +50,8 @@ ListeEntite* initialiserListeEntite(map m) {
     entiteVide->typeEntite = -1;
     entiteVide->coordonnees = (Coordonnees) {-1, -1};
 
-    for (int i = 0; i < m.largeur; i++) {
-        for (int j = 0; j < m.hauteur; j++) {
+    for (int i = 0; i < largeur; i++) {
+        for (int j = 0; j < hauteur; j++) {
             listeEntite->entites[i][j][0] = entiteVide;
             listeEntite->entites[i][j][1] = entiteVide;
         }
@@ -58,12 +61,15 @@ ListeEntite* initialiserListeEntite(map m) {
 }
 
 void freeListeEntite(ListeEntite *listeEntite, map m) {
-    for (int i = 0; i < m.largeur; i++) {
-        for (int j = 0; j < m.hauteur; j++) {
+    int largeur = m.largeur / 2;
+    int hauteur = m.hauteur / 2;
+
+    for (int i = 0; i < largeur; i++) {
+        for (int j = 0; j < hauteur; j++) {
             free(listeEntite->entites[i][j]);
         }
     }
-    for (int i = 0; i < m.largeur; i++) {
+    for (int i = 0; i < largeur; i++) {
         free(listeEntite->entites[i]);
     }
     free(listeEntite->entites);
