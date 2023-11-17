@@ -33,7 +33,7 @@ void *afficheVideo(void *data){
   while(*running) {
         Uint64 frame_start = SDL_GetTicks64();
         
-        SDL_Event e;
+        // SDL_Event e;
 
         //Fond noir
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0x00);
@@ -43,9 +43,9 @@ void *afficheVideo(void *data){
         afficheMapCamera(cam, M, renderer, tM);
         SDL_RenderPresent(renderer);
 
-        while(SDL_PollEvent(&e)){
-          if(e.type == SDL_QUIT) running = false;
-        }
+        // while(SDL_PollEvent(&e)){
+            // if(e.type == SDL_QUIT) running = false;
+        // }
 
         while(SDL_GetTicks64() - frame_start < 1000 / (Uint64)para->FPS)
             SDL_Delay(1 /* ms */);
@@ -58,9 +58,9 @@ int menuPrincipal(SDL_Window *window, parametre *para){
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool running = true;
     bool fin = false;
-  camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, 2., LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
-  texture_map* tM;
-  tM = chargeTextureMap("data/texture/murSolPlafond.png", renderer);
+    camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, 2., LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
+    texture_map* tM;
+    tM = chargeTextureMap("data/texture/murSolPlafond.png", renderer);
 
     map *M;
     M = lecturePseudoMap("data/map/pseudoMap1.pm", tM, 586);
@@ -102,16 +102,16 @@ int menuPrincipal(SDL_Window *window, parametre *para){
 
     //!========== Fin du Test ==========
 
-  //Execution du second thread pour la video
-  argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin};
-  pthread_t threadVideo;
-  pthread_create(&threadVideo, NULL, afficheVideo, &arg);
-  
+    //Execution du second thread pour la video
+    argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin};
+    pthread_t threadVideo;
+    pthread_create(&threadVideo, NULL, afficheVideo, &arg);
 
-  SDL_Event e;
-  while(running){
+
+    SDL_Event e;
+    while(running){
     SDL_WaitEvent(&e);
-    switch (e.type)
+    switch (e.type) 
     {
     case SDL_QUIT:
       running = false;
