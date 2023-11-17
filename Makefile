@@ -11,11 +11,13 @@ else
 	ifeq ($(UNAME_S), Linux)
 		FLAGS_C = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2
 		FLAGS_L = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2
+		
 		SE = linux
 	endif
 	ifeq ($(UNAME_S), Darwin)
 		FLAGS_C = -I/opt/homebrew/include
 		FLAGS_E = -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer
+
 		SE=mac
 	endif
 	clr = rm bin/$(SE)/*.o && echo Tout les fichiers binaires ont ete supprimes

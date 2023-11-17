@@ -16,6 +16,7 @@
 #include <math.h>
 #include <limits.h>
 #include <float.h>
+#include <pthread.h>
 
 
 // #include "texture_map.h"
