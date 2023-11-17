@@ -1,6 +1,7 @@
 #ifndef __MAP_H__
 #define __MAP_H__
 
+#include "parametre.h"
 typedef uint8_t uMap;
 
 struct map
@@ -24,5 +25,7 @@ void afficheMap(map *m, SDL_Renderer *renderer, texture_map *tM);
 map* generateurDeMap(int w, int h, int xBase, int yBase, int wBase, int hBase, int nbWay, int lengthWay, int seed, texture_map *tM);
 void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *tM);
 map* lecturePseudoMap(const char* nom_fichier, texture_map* tM, int seed);
+
+float zoomMinDetermination(map* M, parametre *para);
 
 #endif

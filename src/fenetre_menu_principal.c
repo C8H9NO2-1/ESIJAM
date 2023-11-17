@@ -58,14 +58,16 @@ int menuPrincipal(SDL_Window *window, parametre *para){
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool running = true;
     bool fin = false;
-  camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, 2., LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
   texture_map* tM;
   tM = chargeTextureMap("data/texture/murSolPlafond.png", renderer);
 
   map *M;
   M = lecturePseudoMap("data/map/pseudoMap1.pm", tM, 586);
 
+  float zoomMin = zoomMinDetermination(M, para);
+
   //Execution du second thread pour la video
+  camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, zoomMin, LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
   argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin};
   pthread_t threadVideo;
   pthread_create(&threadVideo, NULL, afficheVideo, &arg);
@@ -94,7 +96,7 @@ int menuPrincipal(SDL_Window *window, parametre *para){
         break;
 
       default:
-        controlCam(&cam, 20, 0.05, &e, 1);
+        controlCam(&cam, 20, 0.05, &e, 1, zoomMin);
         break;
       }
     break;
