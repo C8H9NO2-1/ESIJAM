@@ -13,6 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <math.h>
+#include <limits.h>
+#include <float.h>
 
 
 // #include "texture_map.h"

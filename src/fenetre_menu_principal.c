@@ -14,13 +14,50 @@ int menuPrincipal(SDL_Window *window, parametre *para){
     float time = 0;
     float delta_time = 0;
 
-  camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, 2., LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
+    camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, 2., LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
 
-  texture_map* tM;
-  tM = chargeTextureMap("data/texture/murSolPlafond.png", renderer);
+    texture_map* tM;
+    tM = chargeTextureMap("data/texture/murSolPlafond.png", renderer);
 
-  map *M;
-  M = lecturePseudoMap("data/map/pseudoMap1.pm", tM, 586);
+    map *M;
+    M = lecturePseudoMap("data/map/pseudoMap1.pm", tM, 586);
+
+    //!========== Code de Test ==========
+
+    ListeEntite *listeEntite = initialiserListeEntite(*M);
+
+    Graphe graphe = matriceAdjacences(*M, listeEntite);
+
+    int nbreLigne = (M->hauteur * M->largeur) / 4;
+
+    printf("%d\n", nbreLigne);
+    SDL_Delay(1000);
+
+    for (int i = 0; i < nbreLigne; i++) {
+        for (int j = 0; j < nbreLigne; j++) {
+            printf("%d ", graphe.matriceAdjacenceEnemi1[i][j]);
+        }
+        printf("\n");
+    }
+
+    // printf("Fin de l'affichage de la matrice\n");
+
+    // Coordonnees depart = {M->largeur / 4, 0};
+    // Coordonnees arrivee = {M->largeur / 4, M->largeur / 4};
+
+    // printf("Départ: x = %d / y = %d\n", depart.x, depart.y);
+    // printf("Arrivée: x = %d / y = %d\n", arrivee.x, arrivee.y);
+
+    ListeCheminsEnnemis *listeCheminsEnnemis = calculeCheminsEnnemis(graphe, *M);
+
+    ElementCheminEnnemi *element = listeCheminsEnnemis->chemin1->premier;
+
+    while (element->caseSuivante != NULL) {
+      printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
+      element = element->caseSuivante;
+    }
+
+    //!========== Fin du Test ==========
 
     while(running) {
         Uint64 frame_start = SDL_GetTicks64();
@@ -41,23 +78,23 @@ int menuPrincipal(SDL_Window *window, parametre *para){
                 running = false;
             if(e.type == SDL_KEYDOWN){
                 if(e.key.keysym.sym == SDLK_ESCAPE){
-                  running = false;
+                running = false;
                 }
                 else if (e.key.keysym.sym == SDLK_e)
                 {
-                  SDL_SetWindowTitle(window, "SUPER !!!");
+                SDL_SetWindowTitle(window, "SUPER !!!");
                 }
                 // else if(e.key.keysym.sym == SDLK_f){
                 //   SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
                 // }
                 else if(e.key.keysym.sym == SDLK_g){
-                  SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
                 }
                 else if(e.key.keysym.sym == SDLK_s){
-                  SDL_SetWindowFullscreen(window, 0);
+                SDL_SetWindowFullscreen(window, 0);
                 }
                 else{
-                  controlCam(&cam, 5000, 3, &e, delta_time);
+                controlCam(&cam, 5000, 3, &e, delta_time);
                 }
                 
                 
