@@ -9,14 +9,14 @@ ifeq ($(OS), Windows_NT)
 else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S), Linux)
-		FLAGS_C = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2
-		FLAGS_L = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2
+		FLAGS_C = 
+		FLAGS_L = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2 -pthread
 		
 		SE = linux
 	endif
 	ifeq ($(UNAME_S), Darwin)
 		FLAGS_C = -I/opt/homebrew/include
-		FLAGS_E = -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer
+		FLAGS_E = -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer -pthread
 
 		SE=mac
 	endif

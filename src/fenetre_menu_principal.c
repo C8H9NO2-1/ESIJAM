@@ -43,10 +43,6 @@ void *afficheVideo(void *data){
         afficheMapCamera(cam, M, renderer, tM);
         SDL_RenderPresent(renderer);
 
-        while(SDL_PollEvent(&e)){
-          if(e.type == SDL_QUIT) running = false;
-        }
-
         while(SDL_GetTicks64() - frame_start < 1000 / (Uint64)para->FPS)
             SDL_Delay(1 /* ms */);
     }
@@ -75,12 +71,12 @@ int menuPrincipal(SDL_Window *window, parametre *para){
     printf("%d\n", nbreLigne);
     SDL_Delay(1000);
 
-    for (int i = 0; i < nbreLigne; i++) {
-        for (int j = 0; j < nbreLigne; j++) {
-            printf("%d ", graphe.matriceAdjacenceEnemi1[i][j]);
-        }
-        printf("\n");
-    }
+    // for (int i = 0; i < nbreLigne; i++) {
+    //     for (int j = 0; j < nbreLigne; j++) {
+    //         printf("%d ", graphe.matriceAdjacenceEnemi1[i][j]);
+    //     }
+    //     printf("\n");
+    // }
 
     // printf("Fin de l'affichage de la matrice\n");
 

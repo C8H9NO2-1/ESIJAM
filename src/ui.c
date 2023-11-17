@@ -6,7 +6,6 @@
 void freeBouton_ui(bouton_ui *b);
 
 
-
 ui_liste initList_ui(){
     return NULL;
 }
@@ -61,7 +60,13 @@ void freeListe_ui(ui_liste *l){
 
 void initBouton_ui(void *liste_ui, int x, int y, int w, int h, char* text, void (*action)(void*)){
     bouton_ui *b = malloc(sizeof(bouton_ui));
-
+    b->x = x;
+    b->y = y;
+    b->w = w;
+    b->h = h;
+    b->action = action;
+    b->text = text;
+    //Reste 
 
 }
 
