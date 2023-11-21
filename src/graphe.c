@@ -199,7 +199,7 @@ CheminEnnemi *calculeCheminEnnemi(Coordonnees depart, Coordonnees arrivee, Graph
     // printf("Première initialisation terminée\n");
 
     //========== Algorithme de Dijkstra ==========
-    while (idSommet != idArrivee && idSommet == -1) {
+    while (idSommet != idArrivee && idSommet != -1) {
         mettreAJourDistance(graphe.matriceAdjacenceEnemi1, distance, precedent, idSommet, m);
         dejaVu[idSommet] = true;
         idSommet = plusProcheVoisin(graphe.matriceAdjacenceEnemi1, dejaVu, idSommet, m);

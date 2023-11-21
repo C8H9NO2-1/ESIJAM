@@ -18,11 +18,12 @@ int main(int argc, char *argv[]){
     #ifndef __APPLE__
     IMG_Init(IMG_INIT_PNG);
     #endif
+    TTF_Init();
 
     parametre para = recupererParametre();
 
     SDL_Window *window =
-        SDL_CreateWindow("[NOM PROJET]", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, LARGEUR*para.coefResolution, HAUTEUR*para.coefResolution, para.typeEcran);
+        SDL_CreateWindow("Poulpy’s last stand", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, LARGEUR*para.coefResolution, HAUTEUR*para.coefResolution, para.typeEcran);
     Mix_OpenAudio( MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 2048); 
     Mix_VolumeMusic(MIX_MAX_VOLUME);
     while(demarage){
@@ -50,6 +51,7 @@ int main(int argc, char *argv[]){
 
     SDL_DestroyWindow(window);
 
+    TTF_Quit();
     #ifndef __APPLE__
     IMG_Quit();
     #endif

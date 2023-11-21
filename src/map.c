@@ -59,7 +59,6 @@ void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *
     w = (int) ((cam->x+(cam->w/2))/cam->zoom)/TAILLE_TEXTURE_MAP;
     h = (int) ((cam->y+(cam->h/2))/cam->zoom)/TAILLE_TEXTURE_MAP;
     
-
     //Modification de la position de la camera au cas ou la camera serait parti trop loin
     if(w > m->largeur-1){
         cam->x = ((m->largeur)*TAILLE_TEXTURE_MAP*cam->zoom)-cam->w/2;
@@ -75,9 +74,12 @@ void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *
     int xp = x*TAILLE_TEXTURE_MAP - (cam->x-(cam->w/2))/cam->zoom;
     int yp = y*TAILLE_TEXTURE_MAP - (cam->y-(cam->h/2))/cam->zoom;
 
+    SDL_Texture *fond = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, (w-x+(5/cam->zoom))*TAILLE_TEXTURE_MAP, (h-y+(5/cam->zoom))*TAILLE_TEXTURE_MAP);
+    SDL_SetRenderTarget(renderer, fond);
+
     //Ajout des textures au bonnes endroit
     SDL_Rect rect = {xp, yp, TAILLE_TEXTURE_MAP, TAILLE_TEXTURE_MAP};
-    for(int j = y; (j < h+ ( 5/cam->zoom)) && (j <m->hauteur); j++){
+    for(int j = y; (j < h+ (5/cam->zoom)) && (j <m->hauteur); j++){
         for(int i = x; (i < w+ ( 5/cam->zoom)) && (i < m->largeur); i++){
             if((m->tab[i + j*m->largeur] & 3) == SOL)
                 SDL_RenderCopy(renderer, tM->textureSol[(m->tab[i + j*m->largeur])>>2], NULL, &rect);
@@ -90,8 +92,13 @@ void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *
         rect.x = xp;
         rect.y += TAILLE_TEXTURE_MAP;
     }
-    //Agrandissement des textures selon le zoom
-    SDL_RenderSetScale(renderer, cam->zoom, cam->zoom);
+
+    SDL_SetRenderTarget(renderer, NULL);
+    SDL_Rect dest_rect = { 0, 0, (w-x+(5/cam->zoom))*TAILLE_TEXTURE_MAP*(cam->zoom), (h-y+(5/cam->zoom))*TAILLE_TEXTURE_MAP*(cam->zoom) };
+    //SDL_Rect src_rect = { 0, 0, (w-x+2)*TAILLE_TEXTURE_MAP, (h-y+2)*TAILLE_TEXTURE_MAP};
+    // render
+    if(SDL_RenderCopy(renderer, fond, NULL, &dest_rect) != 0) printf("%s\n", SDL_GetError());
+    SDL_DestroyTexture(fond);
 }
 
 

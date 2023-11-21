@@ -3,20 +3,19 @@ SRC= $(notdir $(wildcard src/*.c))
 
 ifeq ($(OS), Windows_NT)
 	SE = win
-	FLAGS_C = -I include -L lib -lmingw32 -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2 -pthread
-	FLAGS_E = -I include -L lib -lmingw32 -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2 -pthread
+	FLAGS_C = -I include -L lib -lmingw32 -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lSDL2 -pthread
+	FLAGS_E = -I include -L lib -lmingw32 -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lSDL2 -pthread
 	clr = echo Non implementer sur windows
 else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S), Linux)
-		FLAGS_C = 
-		FLAGS_L = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2 -pthread
-		
+		FLAGS_C = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lSDL2
+		FLAGS_E = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lSDL2
 		SE = linux
 	endif
 	ifeq ($(UNAME_S), Darwin)
 		FLAGS_C = -I/opt/homebrew/include
-		FLAGS_E = -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer -pthread
+		FLAGS_E = -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf -pthread
 
 		SE=mac
 	endif
@@ -32,7 +31,7 @@ OBJ= $(SRC:.c=.o)
 all : $(OBJ)
 	@echo Edition des liens...
 	@$(CC) $(addprefix bin/$(SE)/, $^) $(FLAGS_E) -o exe/$(SE)/prog
-	@echo Terminer !
+	@echo Terminé !
 
 clean : 
 	@$(clr)

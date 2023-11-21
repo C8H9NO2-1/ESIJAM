@@ -11,7 +11,6 @@ struct ui_maille{
     ui_type t;
     void* objet;
     ui_maille *next;
-    ui_maille *previous;
 
 };
 typedef ui_maille* ui_liste;
@@ -22,7 +21,7 @@ struct bouton_ui
     int y;
     int w;
     int h;
-    char *text;
+    const char *text;
     void (*action)(void*);
     void *data;
     SDL_Texture *t_nothing;
@@ -30,6 +29,15 @@ struct bouton_ui
     SDL_Texture *t_click;
 };
 typedef struct bouton_ui bouton_ui;
+
+
+ui_liste* initList_ui();
+void ajoutListe_ui(ui_liste *l, ui_type t, void *objet);
+void afficherListe_ui(ui_liste *l, SDL_Renderer *renderer);
+void freeListe_ui(ui_liste *l);
+void initBouton_ui(ui_liste *l, int x, int y, int w, int h, const char* text, void (*action)(void*), SDL_Renderer *renderer, TTF_Font *f);
+void afficheBouton_ui(SDL_Renderer *renderer, bouton_ui *b);
+void freeBouton_ui(bouton_ui *b);
 
 
 #endif
