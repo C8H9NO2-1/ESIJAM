@@ -96,6 +96,10 @@ void attaquerEntite(Entite *entite, Entite *cible);
  */
 void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi *chemin, SDL_Renderer *renderer);
 
+/*
+    Permet d'afficher les unitées présent dans la liste
+*/
+void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M);
 
 //========== Fin Entité ==========
 

@@ -4,6 +4,7 @@
 #include "header/camera.h"
 #include "header/map.h"
 #include "header/camera.h"
+#include "header/entites.h"
 
 map* initMap(int l, int h){
     map *m = malloc(sizeof(map));
@@ -53,7 +54,7 @@ void afficheMap(map *m, SDL_Renderer *renderer, texture_map *tM){
 }
 
 
-void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *tM){
+void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *tM, ListeEntite *lE){
     //Recuperation des coordonnees a afficher
     int x, y, w, h;
     w = (int) ((cam->x+(cam->w/2))/cam->zoom)/TAILLE_TEXTURE_MAP;
@@ -92,6 +93,9 @@ void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *
         rect.x = xp;
         rect.y += TAILLE_TEXTURE_MAP;
     }
+    printf("==0\n");
+    afficherListeEntite(lE, renderer, m);
+    printf("==99\n");
 
     SDL_SetRenderTarget(renderer, NULL);
     SDL_Rect dest_rect = { 0, 0, (w-x+(5/cam->zoom))*TAILLE_TEXTURE_MAP*(cam->zoom), (h-y+(5/cam->zoom))*TAILLE_TEXTURE_MAP*(cam->zoom) };

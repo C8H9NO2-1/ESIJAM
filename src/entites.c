@@ -118,6 +118,19 @@ void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
     free(entite->element);
 }
 
+void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M){
+    printf("==1\n");
+    for(int i = 0; i < M->largeur/2; i++){
+        printf("==2\n");
+        for(int j = 0; j < M->hauteur/2; j++){
+            printf("==3\n");
+            if(listeEntite->entites[i][j][0] != NULL)
+                afficherEntite(listeEntite->entites[i][j][0], renderer);
+        }
+    }
+
+}
+
 void afficherEntite(Entite *entite, SDL_Renderer *renderer) {
     SDL_Rect rect = {entite->coordonnees.x * 64, entite->coordonnees.y * 64, TAILLE_TEXTURE_ENTITE-1, TAILLE_TEXTURE_ENTITE-1};
 
@@ -166,10 +179,11 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi
     // ElementCheminEnnemi *element = chemin->premier;
 
     bool attaque = false;
+    //printf("OK 2\n");
     
     // On parcourt le chemin jusqu'à la fin
     if (element->caseSuivante != NULL) { //! Je ne sais pas si on doit faire ça ou un simple if (dans le deuxième cas if faut refaire un peu le code) 
-                                            //* Je penche plutôt pour un if
+          //printf("OK o\n");                                  //* Je penche plutôt pour un if
 
         attaque = false;
 

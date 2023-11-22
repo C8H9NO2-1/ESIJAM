@@ -24,7 +24,7 @@ struct argAfficheVideo{
     map *M;
     bool *fin;
     ui_liste *l;
-    Entite *entite;
+    ListeEntite *listeEntite;
 };
 typedef struct argAfficheVideo argAfficheVideo;
 
@@ -49,7 +49,7 @@ void *afficheVideo(void *data){
     bool* fin = arg->fin;
     ui_liste *l = arg->l;
 
-    Entite *entite = arg->entite;
+    ListeEntite *listeEntite = arg->listeEntite;
 
     while(*running) {
         Uint64 frame_start = SDL_GetTicks64();
@@ -59,10 +59,13 @@ void *afficheVideo(void *data){
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0x00);
 
         SDL_RenderFillRect(renderer, NULL);
-
-        afficheMapCamera(cam, M, renderer, tM);
-        afficherListe_ui(l, renderer); 
+        printf("OK !\n");
+        afficheMapCamera(cam, M, renderer, tM, listeEntite);
+        printf("OK 1\n");
+        afficherListe_ui(l, renderer);
+        printf("OK 2\n"); 
         SDL_RenderPresent(renderer);
+        printf("OK 3\n");
 
         while(SDL_GetTicks64() - frame_start < 1000 / (Uint64)para->FPS)
             SDL_Delay(1 /* ms */);
@@ -82,8 +85,13 @@ void *unite(void *data) {
     CheminEnnemi *chemin = arg->chemin;
     bool *fin = arg->fin;
 
-    while (running) {
+    while (*running) {
+        Uint64 frame_start = SDL_GetTicks64();
+
         uniteEnnemie(entite, listeEntite, m, chemin, NULL);
+
+        while(SDL_GetTicks64() - frame_start < 1000 / 5)
+            SDL_Delay(1);
     }
 
     *fin = true;
@@ -141,40 +149,40 @@ int jeu(SDL_Window *window, parametre *para){
     // printf("Arrivée: x = %d / y = %d\n", arrivee.x, arrivee.y);
 
     ListeCheminsEnnemis *listeCheminsEnnemis = calculeCheminsEnnemis(graphe, *M);
-    // entite->element = listeCheminsEnnemis->chemin1->premier;
+    entite->element = listeCheminsEnnemis->chemin1->premier;
 
 
-    printf("Premier chemin: \n");
-    ElementCheminEnnemi *element = listeCheminsEnnemis->chemin1->premier;
-    while (element->caseSuivante != NULL) {
-        printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
-        element = element->caseSuivante;
-    }
-    printf("\n");
+    // printf("Premier chemin: \n");
+    // ElementCheminEnnemi *element = listeCheminsEnnemis->chemin1->premier;
+    // while (element->caseSuivante != NULL) {
+    //     printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
+    //     element = element->caseSuivante;
+    // }
+    // printf("\n");
 
-    printf("Deuxième chemin: \n");
-    element = listeCheminsEnnemis->chemin2->premier;
-    while (element->caseSuivante != NULL) {
-        printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
-        element = element->caseSuivante;
-    }
-    printf("\n");
+    // printf("Deuxième chemin: \n");
+    // element = listeCheminsEnnemis->chemin2->premier;
+    // while (element->caseSuivante != NULL) {
+    //     printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
+    //     element = element->caseSuivante;
+    // }
+    // printf("\n");
 
-    printf("Troisième chemin: \n");
-    element = listeCheminsEnnemis->chemin3->premier;
-    while (element->caseSuivante != NULL) {
-        printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
-        element = element->caseSuivante;
-    }
-    printf("\n");
+    // printf("Troisième chemin: \n");
+    // element = listeCheminsEnnemis->chemin3->premier;
+    // while (element->caseSuivante != NULL) {
+    //     printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
+    //     element = element->caseSuivante;
+    // }
+    // printf("\n");
 
-    printf("Quatrième chemin: \n");
-    element = listeCheminsEnnemis->chemin4->premier;
-    while (element->caseSuivante != NULL) {
-        printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
-        element = element->caseSuivante;
-    }
-    printf("\n");
+    // printf("Quatrième chemin: \n");
+    // element = listeCheminsEnnemis->chemin4->premier;
+    // while (element->caseSuivante != NULL) {
+    //     printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
+    //     element = element->caseSuivante;
+    // }
+    // printf("\n");
 
     //!========== Fin du Test ==========
 
@@ -187,7 +195,7 @@ int jeu(SDL_Window *window, parametre *para){
 
     //Execution du second thread pour la video
     camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, zoomMin, LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
-    argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin, l};
+    argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin, l, listeEntite};
     pthread_t threadVideo;
     pthread_create(&threadVideo, NULL, afficheVideo, &arg);
   
@@ -224,6 +232,7 @@ int jeu(SDL_Window *window, parametre *para){
         }
     //Attente de fin d'execution du second thread
     while(fin != true) SDL_Delay(50);
+    while(finEntite != true) SDL_Delay(50);
     
 
     freeListe_ui(l);
