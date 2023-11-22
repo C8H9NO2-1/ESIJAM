@@ -8,7 +8,7 @@ void afficheBouton_ui(SDL_Renderer *renderer, bouton_ui *b);
 void eventBouton_ui(bouton_ui *b, SDL_Event *e);
 void freeLabel_ui(label_ui *la);
 void afficheLabel_ui(SDL_Renderer *renderer, label_ui *la);
-
+ 
 
 ui_liste* initList_ui(){
     ui_liste *l;

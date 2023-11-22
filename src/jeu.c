@@ -8,9 +8,10 @@
 #include "header/texture_entites.h"
 #include "header/graphe.h"
 #include "header/ui.h"
+ 
 
 void teste1(void *data){
-  printf("%s\n", (char*) data);
+    printf("%s\n", (char*) data);
 }
 
 //Argument pour le second thread
@@ -184,48 +185,43 @@ int jeu(SDL_Window *window, parametre *para){
 
     float zoomMin = zoomMinDetermination(M, para);
 
-  //Execution du second thread pour la video
-  camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, zoomMin, LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
-  argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin, l};
-  pthread_t threadVideo;
-  pthread_create(&threadVideo, NULL, afficheVideo, &arg);
+    //Execution du second thread pour la video
+    camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, zoomMin, LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
+    argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin, l};
+    pthread_t threadVideo;
+    pthread_create(&threadVideo, NULL, afficheVideo, &arg);
   
 
-  SDL_Event e;
-  while(running){
-    SDL_WaitEvent(&e);
-    switch (e.type)
-    {
-    case SDL_QUIT:
-      running = false;
-      break;
-    case SDL_KEYDOWN:
-      switch (e.key.keysym.sym)
-      {
-      case SDLK_ESCAPE:
-        running = false;
+    SDL_Event e;
+    while(running){
+        SDL_WaitEvent(&e);
+        switch (e.type){
+            case SDL_QUIT:
+                running = false;
+                break;
+            case SDL_KEYDOWN:
+                switch (e.key.keysym.sym){
+                    case SDLK_ESCAPE:
+                        running = false;
+                        break;
+                    case SDLK_g:
+                        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                        break;  
+                    case SDLK_s:
+                        SDL_SetWindowFullscreen(window, 0);
+                        break;
+                    default:
+                        controlCam(&cam, 20, 0.05, &e, 1, zoomMin);
+                        break;
+                }
+                break;
+        
+        default:
         break;
-      
-      case SDLK_g:
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-        break;
-      
-      case SDLK_s:
-        SDL_SetWindowFullscreen(window, 0);
-        break;
+        }
+        eventListe_ui(l, &e);
 
-      default:
-        controlCam(&cam, 20, 0.05, &e, 1, zoomMin);
-        break;
-      }
-    break;
-    
-    default:
-      break;
-    }
-    eventListe_ui(l, &e);
-
-    }
+        }
     //Attente de fin d'execution du second thread
     while(fin != true) SDL_Delay(50);
     

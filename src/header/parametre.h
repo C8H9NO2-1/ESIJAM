@@ -9,7 +9,7 @@
 #define HAUTEUR 9
 
 //Demarrage sur le menu principal
-#define START fenetre_menu_principal;
+#define START fenetre_jeu;
 
 struct parametre{
     int coefResolution;
