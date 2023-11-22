@@ -10,15 +10,8 @@
 #define DURABILITE_PIEGE 10
 #define DEGATS_INFLIGES 10
 
-#define WIDTH_MAP 100
-#define HEIGHT_MAP 56
-
-//========== Coordonnées ==========
-typedef struct Coordonnees Coordonnees;
-struct Coordonnees {
-    int x;
-    int y;
-};
+// #define WIDTH_MAP 100
+// #define HEIGHT_MAP 56
 
 /**
  * @brief Fonction qui renvoie l'indice du minimum d'un tableau
@@ -30,54 +23,20 @@ struct Coordonnees {
 int minTableau(float *tab, int taille);
 
 //========== Entité ==========
-typedef enum Allegeance Allegeance;
-enum Allegeance {
-    AMI, ENNEMI
-};
-
-typedef enum TypeEntite TypeEntite;
-enum TypeEntite {
-    UNITE, PIEGE1, PIEGE2
-};
-
-typedef struct Entite Entite;
-struct Entite {
-    int pointsVie;
-    int pointsAttaque;
-    Allegeance allegeance;
-    TypeEntite typeEntite;
-    Coordonnees coordonnees;
-};
-
-typedef struct texture_entite texture_entite;
-struct texture_entite {
-    // Pour les unités
-    SDL_Texture **textureAmi; // Tableau des textures des unités amies
-    int nbTextureAmi;
-    SDL_Texture **textureEnnemi; // Tableau des textures des unités ennemies
-    int nbTextureEnnemi; // À priori égal à nbTextureAmi
-
-    // Pour les pièges
-    SDL_Texture **texturePiege1; // Tableau des textures des pièges 1 (murs cassables)
-    int nbTexturePiege1;
-    SDL_Texture **texturePiege2; // Tableau des textures des pièges 2 (à définir)
-    int nbTexturePiege2; // À priori égal à nbTexturePiege1
-};
-
-// Dans la première case du dernier tableau on met les unités et dans la deuxième les pièges
-typedef struct ListeEntite ListeEntite;
-struct ListeEntite {
-    // Entite *entites[WIDTH_MAP][HEIGHT_MAP][2];
-    Entite ****entites;
-};
 
 /**
  * @brief Fonction qui permet d'initialiser une liste d'entités
  * 
- * @param listeEntite Pointeur vers la liste d'entités à initialiser
+ * @param m Carte de la partie
  */
 ListeEntite* initialiserListeEntite(map m);
 
+/**
+ * @brief Fonction qui permet de détruire une liste d'entités
+ * 
+ * @param listeEntite Pointeur vers la liste d'entités à détruire
+ * @param m Carte de la partie
+ */
 void freeListeEntite(ListeEntite *listeEntite, map m);
 
 /**
@@ -95,6 +54,7 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
  * @brief Fonction qui permet de détruire une entité
  * 
  * @param entite Pointeur vers l'entité à détruire
+ * @param listeEntite Pointeur vers la liste des entités
  */
 void detruireEntite(Entite *entite, ListeEntite *listeEntite);
 
@@ -105,7 +65,7 @@ void detruireEntite(Entite *entite, ListeEntite *listeEntite);
  * @param renderer Pointeur vers le renderer
  * @param tE Pointeur vers les textures des entités
  */
-void afficherEntite(Entite *entite, SDL_Renderer *renderer, texture_entite *tE); //! Cette fonction devra être modifiée une fois que Tym aura fini les textures
+void afficherEntite(Entite *entite, SDL_Renderer *renderer); //! Cette fonction devra être modifiée une fois que Tym aura fini les textures
 
 /**
  * @brief Fonction qui permet le déplacement d'une entité
@@ -113,6 +73,7 @@ void afficherEntite(Entite *entite, SDL_Renderer *renderer, texture_entite *tE);
  * @param entite Entité à déplacer
  * @param coordonnees Destination de l'entite
  * @param m Pointeur vers la carte
+ * @param listeEntite Pointeur vers la liste des entités
  */
 void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m, ListeEntite *listeEntite);
 
@@ -123,6 +84,20 @@ void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m, ListeEnt
  * @param cible Pointeur vers l'entité qui est attaquée
  */
 void attaquerEntite(Entite *entite, Entite *cible);
+
+/**
+ * @brief Fonction qui gère une unitée ennemie, c'est-à-dire qui la fait se déplacer et la fait attaquer
+ * 
+ * @param entite Pointeur vers l'entité à gérer
+ * @param listeEntite Pointeur vers la liste des entités
+ * @param m Pointeur vers la carte
+ * @param graphe Pointeur vers les graphes de la map
+ * @param chemin Pointeur vers la liste des chemins des ennemis
+ * @param renderer Pointeur vers le renderer
+ * @param tE Pointeur vers les textures des entités
+ */
+void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, Graphe *graphe, CheminEnnemi *chemin, SDL_Renderer *renderer);
+
 
 //========== Fin Entité ==========
 

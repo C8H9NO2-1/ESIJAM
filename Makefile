@@ -14,6 +14,7 @@ else
 		SE = linux
 	endif
 	ifeq ($(UNAME_S), Darwin)
+		CC = clang
 		FLAGS_C = -I/opt/homebrew/include
 		FLAGS_E = -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf -pthread
 
