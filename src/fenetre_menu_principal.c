@@ -96,7 +96,7 @@ int menuPrincipal(SDL_Window *window, parametre *para){
 
     chargerTextureEntite(entite->texture, "data/adventurer-Sheet.png", "data/adventurer-Sheet.png", renderer);
 
-    // Graphe graphe = matriceAdjacences(*M, listeEntite);
+    Graphe graphe = matriceAdjacences(*M, listeEntite);
 
     // int nbreLigne = (M->hauteur * M->largeur) / 4;
 
