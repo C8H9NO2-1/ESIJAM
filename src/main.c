@@ -1,7 +1,7 @@
 #include "header/base.h"
 
 #include "header/parametre.h"
-#include "header/fenetre_menu_principal.h"
+#include "header/jeu.h"
 /*
 Liste des erreurs :
     =1 : Le fichier de parametre (data/jeu.config) n'a pas pu etre ouvert
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
         switch (demarage)
         {
         case fenetre_menu_principal:
-            demarage = menuPrincipal(window, &para);
+            demarage = jeu(window, &para);
             break;
         case fenetre_parametre:
             //demarage = parametre(window, &para);

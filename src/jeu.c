@@ -28,10 +28,10 @@ struct argUniteEnnemie {
     Entite *entite;
     ListeEntite *listeEntite;
     map *m;
-    Graphe *graphe;
     CheminEnnemi *chemin;
+    bool *fin;
 };
-typedef struct argAfficheEntite argAfficheEntite;
+typedef struct argUniteEnnemie argUniteEnnemie;
 //Fonction qui est executer dans un autre thread que le principal et qui permet d'afficher selon des FPS
 void *afficheVideo(void *data){
     argAfficheVideo *arg = (argAfficheVideo*) data;
@@ -66,7 +66,7 @@ void *afficheVideo(void *data){
         SDL_RenderFillRect(renderer, NULL);
 
         afficheMapCamera(cam, M, renderer, tM);
-        afficherListe_ui(l, renderer);
+        afficherListe_ui(l, renderer); 
         SDL_RenderPresent(renderer);
 
         while(SDL_GetTicks64() - frame_start < 1000 / (Uint64)para->FPS)
@@ -78,7 +78,24 @@ void *afficheVideo(void *data){
     return NULL;
 }
 
-int menuPrincipal(SDL_Window *window, parametre *para){
+void *unite(void *data) {
+    argUniteEnnemie *arg = (argUniteEnnemie*) data;
+    bool *running = arg->running;
+    Entite *entite = arg->entite;
+    ListeEntite *listeEntite = arg->listeEntite;
+    map *m = arg->m;
+    CheminEnnemi *chemin = arg->chemin;
+    bool *fin = arg->fin;
+
+    while (running) {
+        uniteEnnemie(entite, listeEntite, m, chemin, NULL);
+    }
+
+    *fin = true;
+    return NULL;
+}
+
+int jeu(SDL_Window *window, parametre *para){
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool running = true;
     bool fin = false;
@@ -163,6 +180,11 @@ int menuPrincipal(SDL_Window *window, parametre *para){
     argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin, entite};
     pthread_t threadVideo;
     pthread_create(&threadVideo, NULL, afficheVideo, &arg);
+
+    bool finEntite = false;
+    argUniteEnnemie arguments = {&running, entite, listeEntite, M, listeCheminsEnnemis->chemin1, &finEntite};
+    pthread_t threadEnnemi1;
+    pthread_create(&threadEnnemi1, NULL, unite, &arguments);
     
     SDL_Event e;
     while(running){
@@ -201,6 +223,7 @@ int menuPrincipal(SDL_Window *window, parametre *para){
     }
     //Attente de fin d'execution du second thread
     while(fin != true) SDL_Delay(50);
+    // while(finEntite != true) SDL_Delay(50);
 
     freeListeCheminsEnnemis(listeCheminsEnnemis);
     freeGraphe(graphe, *M);

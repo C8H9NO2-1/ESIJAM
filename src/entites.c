@@ -158,7 +158,7 @@ void attaquerEntite(Entite *entite, Entite *cible) {
 }
 
 //TODO Il faut peut-être ajouter un champ dans la structure d'une entité indiquant quel chemin cette entité emprunte (pas si on fait un thread pour chaque unité)
-void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, Graphe *graphe, CheminEnnemi *chemin, SDL_Renderer *renderer) {
+void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi *chemin, SDL_Renderer *renderer) {
     int largeur = m->largeur / 2;
     int hauteur = m->hauteur / 2;
 
@@ -241,7 +241,6 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, Graphe *grap
 
         // On déplace l'unité ennemie
         deplacementEntite(entite, (Coordonnees) {xSuivant, ySuivant}, m, listeEntite);
-        // afficherEntite(entite, renderer);
 
         entite->element = element->caseSuivante;
         // element = element->caseSuivante;

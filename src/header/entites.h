@@ -91,12 +91,10 @@ void attaquerEntite(Entite *entite, Entite *cible);
  * @param entite Pointeur vers l'entité à gérer
  * @param listeEntite Pointeur vers la liste des entités
  * @param m Pointeur vers la carte
- * @param graphe Pointeur vers les graphes de la map
  * @param chemin Pointeur vers la liste des chemins des ennemis
  * @param renderer Pointeur vers le renderer
- * @param tE Pointeur vers les textures des entités
  */
-void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, Graphe *graphe, CheminEnnemi *chemin, SDL_Renderer *renderer);
+void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi *chemin, SDL_Renderer *renderer);
 
 
 //========== Fin Entité ==========
