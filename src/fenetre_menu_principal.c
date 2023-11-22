@@ -7,6 +7,7 @@
 #include "header/entites.h"
 #include "header/texture_entites.h"
 #include "header/graphe.h"
+#include "header/ui.h"
 
 //Argument pour le second thread
 struct argAfficheVideo{
@@ -44,20 +45,35 @@ void *afficheVideo(void *data){
 
     Entite *entite = arg->entite;
 
+  //----------------------------------------Teste UI----------------
+  printf("OK 1\n");
+  ui_liste *l = initList_ui();
+  printf("OK 2\n");
+  TTF_Font *font = TTF_OpenFont("data/fonts/roboto.ttf", 2000);
+  printf("OK 3\n");
+  initBouton_ui(l, 100, 100, 100, 50, "Bonjour", NULL, renderer, font);
+  initBouton_ui(l, 1000, 100, 100, 50, "Hello Wolrd", NULL, renderer, font);
+  printf("OK 4\n");
+  //---------------------------------------Fin Teste UI--------------
+
     while(*running) {
         Uint64 frame_start = SDL_GetTicks64();
 
+        SDL_RenderClear(renderer);
         //Fond noir
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0x00);
 
         SDL_RenderFillRect(renderer, NULL);
 
         afficheMapCamera(cam, M, renderer, tM);
+        afficherListe_ui(l, renderer);
         SDL_RenderPresent(renderer);
 
         while(SDL_GetTicks64() - frame_start < 1000 / (Uint64)para->FPS)
             SDL_Delay(1 /* ms */);
     }
+
+    freeListe_ui(l);
     *fin = true;
     return NULL;
 }
@@ -80,19 +96,19 @@ int menuPrincipal(SDL_Window *window, parametre *para){
 
     chargerTextureEntite(entite->texture, "data/adventurer-Sheet.png", "data/adventurer-Sheet.png", renderer);
 
-    Graphe graphe = matriceAdjacences(*M, listeEntite);
+    // Graphe graphe = matriceAdjacences(*M, listeEntite);
 
-    int nbreLigne = (M->hauteur * M->largeur) / 4;
+    // int nbreLigne = (M->hauteur * M->largeur) / 4;
 
-    printf("%d\n", nbreLigne);
-    SDL_Delay(1000);
+    // printf("%d\n", nbreLigne);
+    // SDL_Delay(1000);
 
-    // for (int i = 0; i < nbreLigne; i++) {
-    //     for (int j = 0; j < nbreLigne; j++) {
-    //         printf("%d ", graphe.matriceAdjacenceEnemi1[i][j]);
-    //     }
-    //     printf("\n");
-    // }
+    // // for (int i = 0; i < nbreLigne; i++) {
+    // //     for (int j = 0; j < nbreLigne; j++) {
+    // //         printf("%d ", graphe.matriceAdjacenceEnemi1[i][j]);
+    // //     }
+    // //     printf("\n");
+    // // }
 
     // printf("Fin de l'affichage de la matrice\n");
 
