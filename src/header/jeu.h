@@ -1,5 +1,5 @@
-#ifndef __FENETRE_MENU_PRINCIPAL_H__
-#define __FENETRE_MENU_PRINCIPAL_H__
+#ifndef __JEU_H__
+#define __JEU_H__
 
 int jeu(SDL_Window *window, parametre *para);
 
