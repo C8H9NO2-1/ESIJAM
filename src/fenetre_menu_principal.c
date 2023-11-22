@@ -12,7 +12,7 @@
 int menuPrincipal(SDL_Window *window, parametre *para){
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool running = true;
-
+ 
     ui_liste *l = initList_ui();
     TTF_Font *font = TTF_OpenFont("data/fonts/roboto.ttf", 2000);
     initLabel_ui(l, 500, 200, 300, 150, "Poulpy's", renderer, font);

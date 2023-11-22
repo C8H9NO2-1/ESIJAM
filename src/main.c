@@ -3,6 +3,7 @@
 #include "header/parametre.h"
 #include "header/fenetre_menu_principal.h"
 #include "header/jeu.h"
+ 
 /*
 Liste des erreurs :
     =1 : Le fichier de parametre (data/jeu.config) n'a pas pu etre ouvert

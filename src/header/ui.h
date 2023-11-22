@@ -30,7 +30,7 @@ struct bouton_ui
     SDL_Texture *t_afficher;
 };
 typedef struct bouton_ui bouton_ui;
-
+ 
 struct label_ui{
     int x;
     int y;
