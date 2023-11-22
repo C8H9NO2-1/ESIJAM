@@ -20,16 +20,6 @@ int identifiantCase(Coordonnees tuile, map m);
  */
 int heuristique(Coordonnees tuile, Coordonnees arrivee);
 
-typedef struct Graphe Graphe;
-struct Graphe {
-
-    int nbreLigne;
-
-    int** matriceAdjacenceEnemi1;
-    int** matriceAdjacenceEnemi2; // Cette matrice est la même que celle de l'enemi 1 sauf que l'on ne tient pas compte des murs cassables
-    int** matriceAdjacenceAllie;
-};
-
 /**
  * @brief Fonction qui calcule les différentes matrices d'adjacences du graphe de la map
  * 
@@ -38,25 +28,6 @@ struct Graphe {
  * @return Graphe Matrices d'adjacences
  */
 Graphe matriceAdjacences(map m, ListeEntite *listeEntite);
-
-typedef struct ElementCheminEnnemi ElementCheminEnnemi;
-struct ElementCheminEnnemi {
-    Coordonnees coordonnees;
-    ElementCheminEnnemi *caseSuivante;
-};
-
-typedef struct CheminEnnemi CheminEnnemi;
-struct CheminEnnemi {
-    ElementCheminEnnemi *premier;
-};
-
-typedef struct ListeCheminsEnnemis ListeCheminsEnnemis;
-struct ListeCheminsEnnemis {
-    CheminEnnemi *chemin1;
-    CheminEnnemi *chemin2;
-    CheminEnnemi *chemin3;
-    CheminEnnemi *chemin4;
-};
 
 /**
  * @brief Fonction qui renvoie le sommet non visité le plus proche
@@ -108,5 +79,20 @@ ListeCheminsEnnemis *calculeCheminsEnnemis(Graphe graphe, map m);
  * @param m Map dont on a calculé la matrice d'adjacence
  */
 void freeMatriceAdjacence(int** matrice, map m);
+
+/**
+ * @brief Détruit le graphe
+ * 
+ * @param graphe Graphe à détruire
+ * @param m Map dont on a calculé la matrice d'adjacence
+ */
+void freeGraphe(Graphe graphe, map m);
+
+/**
+ * @brief Détruit la liste des chemins des ennemis
+ * 
+ * @param listeCheminsEnnemis Liste des chemins des ennemis à détruire
+ */
+void freeListeCheminsEnnemis(ListeCheminsEnnemis *listeCheminsEnnemis);
 
 #endif

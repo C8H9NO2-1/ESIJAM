@@ -7,7 +7,7 @@ camera initCamera(float x, float y, float zoom, int w, int h){
     return cam;
 }
 
-void controlCam(camera* cam, float pas, float pasZoom, SDL_Event* e, float dt){
+void controlCam(camera* cam, float pas, float pasZoom, SDL_Event* e, float dt, float zoomMin){
     switch(e->key.keysym.sym){
         case SDLK_UP:
             if(cam->y-(cam->h/2) - pas*dt > 0)
@@ -38,11 +38,13 @@ void controlCam(camera* cam, float pas, float pasZoom, SDL_Event* e, float dt){
             }
             break;
         case SDLK_KP_MINUS :
-            if(cam->zoom - pasZoom*dt >= ZOOM_MIN)
-            cam->zoom -= pasZoom*dt;
+            printf("Diff : %f\t%f\n", cam->zoom, zoomMin);
+            if(cam->zoom - pasZoom*dt >= zoomMin){
+                cam->zoom -= pasZoom*dt;
+            }
             break;
         case SDLK_1 :
-            if(cam->zoom - pasZoom*dt >= ZOOM_MIN)
+            if(cam->zoom - pasZoom*dt >= zoomMin)
             cam->zoom -= pasZoom*dt;
             break;
         default:

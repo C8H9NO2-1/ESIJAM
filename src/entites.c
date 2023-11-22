@@ -80,6 +80,8 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
     // On initialise les variables qui ne dépendent pas du type d'entite avec lequel on travaille
     entite->coordonnees = coordonnees;
     entite->typeEntite = typeEntite;
+    entite->texture = (texture_entite *) malloc(sizeof(texture_entite));
+    entite->element = (ElementCheminEnnemi *) malloc(sizeof(ElementCheminEnnemi));
 
     // Si l'entite est une unite
     if (typeEntite == UNITE) {
@@ -111,24 +113,27 @@ void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
     entite->typeEntite = -1;
     entite->coordonnees.x = -1;
     entite->coordonnees.y = -1;
+    
+    free(entite->texture);
+    free(entite->element);
 }
 
-void afficherEntite(Entite *entite, SDL_Renderer *renderer, texture_entite *tE) {
-    SDL_Rect rect = {entite->coordonnees.x, entite->coordonnees.y, TAILLE_TEXTURE_ENTITE-1, TAILLE_TEXTURE_ENTITE-1};
+void afficherEntite(Entite *entite, SDL_Renderer *renderer) {
+    SDL_Rect rect = {entite->coordonnees.x * 64, entite->coordonnees.y * 64, TAILLE_TEXTURE_ENTITE-1, TAILLE_TEXTURE_ENTITE-1};
 
     switch (entite->typeEntite) {
     case UNITE:
         if (entite->allegeance == AMI) {
-            SDL_RenderCopy(renderer, tE->textureAmi[0], NULL, &rect);
+            SDL_RenderCopy(renderer, entite->texture->textureAmi[0], NULL, &rect);
         } else {
-            SDL_RenderCopy(renderer, tE->textureEnnemi[0], NULL, &rect);
+            SDL_RenderCopy(renderer, entite->texture->textureEnnemi[0], NULL, &rect);
         }
         break;
     case PIEGE1:
-        SDL_RenderCopy(renderer, tE->texturePiege1[0], NULL, &rect);
+        SDL_RenderCopy(renderer, entite->texture->texturePiege1[0], NULL, &rect);
         break;
     case PIEGE2:
-        SDL_RenderCopy(renderer, tE->texturePiege2[0], NULL, &rect);
+        SDL_RenderCopy(renderer, entite->texture->texturePiege2[0], NULL, &rect);
         break;
     default:
         break;
@@ -137,13 +142,110 @@ void afficherEntite(Entite *entite, SDL_Renderer *renderer, texture_entite *tE) 
 
 void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m, ListeEntite *listeEntite) {
     if (entite->typeEntite == UNITE) {
+        // On met à jour la liste des entités
+        listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][0] = NULL;
+        listeEntite->entites[coordonnees.x][coordonnees.y][0] = entite;
 
+        // On met à jour les coordonnées de l'entité
+        entite->coordonnees = coordonnees;
     }
 }
 
 void attaquerEntite(Entite *entite, Entite *cible) {
     if (entite->allegeance != cible->allegeance) {
         cible->pointsVie -= entite->pointsAttaque;
+    }
+}
+
+//TODO Il faut peut-être ajouter un champ dans la structure d'une entité indiquant quel chemin cette entité emprunte (pas si on fait un thread pour chaque unité)
+void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, Graphe *graphe, CheminEnnemi *chemin, SDL_Renderer *renderer) {
+    int largeur = m->largeur / 2;
+    int hauteur = m->hauteur / 2;
+
+    ElementCheminEnnemi *element = entite->element;
+    // ElementCheminEnnemi *element = chemin->premier;
+
+    bool attaque = false;
+    
+    // On parcourt le chemin jusqu'à la fin
+    if (element->caseSuivante != NULL) { //! Je ne sais pas si on doit faire ça ou un simple if (dans le deuxième cas if faut refaire un peu le code) 
+                                            //* Je penche plutôt pour un if
+
+        attaque = false;
+
+        //Si l'entité est détruite on sort de la fonction
+        if (entite->pointsVie <= 0) {
+            detruireEntite(entite, listeEntite);
+            return;
+        }
+        // On récupère les coordonnées de l'entité
+        int x = entite->coordonnees.x;
+        int y = entite->coordonnees.y;
+
+        // Il faut prendre en compte le cas où la case actuelle est un piège
+        if (listeEntite->entites[x][y][1] != NULL) {
+            if (listeEntite->entites[x][y][1]->typeEntite == PIEGE2) {
+                attaquerEntite(listeEntite->entites[x][y][1], entite); // On se fait attaquer par le piège
+            }
+        }
+
+        // Si le nexus est à proximité, on l'attaque
+        if (element->caseSuivante->coordonnees.x == largeur / 2 && element->caseSuivante->coordonnees.y == hauteur / 2) {
+            attaquerEntite(entite, listeEntite->entites[largeur / 2][hauteur / 2][0]);
+            if (listeEntite->entites[largeur / 2][hauteur / 2][0]->pointsVie <= 0) {
+                //TODO On détruit le nexus et le joueur à perdu
+                return;
+            }
+            // continue;
+            return;
+        }
+
+        // Si une unité alliée est à proximité de l'ennemi, on l'attaque
+        // On en attaque une à la fois
+        for (int i = -1; i <= 1; i++) {
+            if (x + i >= 0 && x + i < largeur) {
+                for (int j = -1; j <= 1; j++) {
+                    if (y + j >= 0 && y + j < hauteur) {
+                        if (listeEntite->entites[x+i][y+j][0] != NULL) {
+                            if (listeEntite->entites[x+i][y+j][0]->allegeance == AMI) {
+                                attaquerEntite(entite, listeEntite->entites[x+i][y+j][0]);
+                                attaque = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (attaque) {
+            // continue;
+            return;
+        }
+
+        // On récupère les coordonnées de la case suivante
+        int xSuivant = element->caseSuivante->coordonnees.x;
+        int ySuivant = element->caseSuivante->coordonnees.y;
+
+        // On doit gérer le cas où la prochaine case est un mur cassable
+        if (listeEntite->entites[xSuivant][ySuivant][1] != NULL) {
+            if (listeEntite->entites[xSuivant][ySuivant][1]->typeEntite == PIEGE1) {
+                attaquerEntite(entite, listeEntite->entites[xSuivant][ySuivant][1]); // On détruit le mur cassable
+                // Si le mur n'a plus de points de vie, on le détruit
+                if (listeEntite->entites[xSuivant][ySuivant][1]->pointsVie <= 0) {
+                    detruireEntite(listeEntite->entites[xSuivant][ySuivant][1], listeEntite);
+                }
+                // continue;
+                return;
+            }
+        }
+
+        // On déplace l'unité ennemie
+        deplacementEntite(entite, (Coordonnees) {xSuivant, ySuivant}, m, listeEntite);
+        // afficherEntite(entite, renderer);
+
+        entite->element = element->caseSuivante;
+        // element = element->caseSuivante;
+        
     }
 }
 

@@ -76,19 +76,19 @@ void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *
     int yp = y*TAILLE_TEXTURE_MAP - (cam->y-(cam->h/2))/cam->zoom;
 
     //Ajout des textures au bonnes endroit
-    SDL_Rect rect = {xp, yp, TAILLE_TEXTURE_MAP-1, TAILLE_TEXTURE_MAP-1 };
-    for(int j = y; (j < h+ ( (int) 5/cam->zoom)) && (j <m->hauteur); j++){
-        for(int i = x; (i < w+ ((int) 5/cam->zoom)) && (i < m->largeur); i++){
+    SDL_Rect rect = {xp, yp, TAILLE_TEXTURE_MAP, TAILLE_TEXTURE_MAP};
+    for(int j = y; (j < h+ ( 5/cam->zoom)) && (j <m->hauteur); j++){
+        for(int i = x; (i < w+ ( 5/cam->zoom)) && (i < m->largeur); i++){
             if((m->tab[i + j*m->largeur] & 3) == SOL)
                 SDL_RenderCopy(renderer, tM->textureSol[(m->tab[i + j*m->largeur])>>2], NULL, &rect);
             else if((m->tab[i + j*m->largeur] & 3) == PLAFOND)
                 SDL_RenderCopy(renderer, tM->texturePlafond[(m->tab[i + j*m->largeur])>>2], NULL, &rect);
             else
                 SDL_RenderCopy(renderer, tM->textureMur[(m->tab[i + j*m->largeur])>>2], NULL, &rect);
-            rect.x += TAILLE_TEXTURE_MAP-1;
+            rect.x += TAILLE_TEXTURE_MAP;
         }
         rect.x = xp;
-        rect.y += TAILLE_TEXTURE_MAP-1;
+        rect.y += TAILLE_TEXTURE_MAP;
     }
     //Agrandissement des textures selon le zoom
     SDL_RenderSetScale(renderer, cam->zoom, cam->zoom);
@@ -395,4 +395,11 @@ map* lecturePseudoMap(const char* nom_fichier, texture_map* tM, int seed){
     free(pseudoMap2);    
     fclose(fichier);
     return m;
+}
+
+float zoomMinDetermination(map *M, parametre* para){
+    float r1 = ((float) para->coefResolution*LARGEUR)/((float) M->largeur*TAILLE_TEXTURE_MAP);
+    float r2 = ((float) para->coefResolution*HAUTEUR)/((float) M->hauteur*TAILLE_TEXTURE_MAP);
+    if(r1 < r2) return r2;
+    return r1;
 }
