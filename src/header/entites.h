@@ -92,9 +92,9 @@ void attaquerEntite(Entite *entite, Entite *cible);
  * @param listeEntite Pointeur vers la liste des entités
  * @param m Pointeur vers la carte
  * @param chemin Pointeur vers la liste des chemins des ennemis
- * @param renderer Pointeur vers le renderer
+ * @param defeat Pointeur indiquant si le joueur a perdu ou non
  */
-void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi *chemin, SDL_Renderer *renderer);
+void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi *chemin, bool *defeat);
 
 
 //========== Fin Entité ==========

@@ -158,7 +158,7 @@ void attaquerEntite(Entite *entite, Entite *cible) {
 }
 
 //TODO Il faut peut-être ajouter un champ dans la structure d'une entité indiquant quel chemin cette entité emprunte (pas si on fait un thread pour chaque unité)
-void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi *chemin, SDL_Renderer *renderer) {
+void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi *chemin, bool *defeat) {
     int largeur = m->largeur / 2;
     int hauteur = m->hauteur / 2;
 
@@ -166,9 +166,9 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi
     // ElementCheminEnnemi *element = chemin->premier;
 
     bool attaque = false;
-    
+
     // On parcourt le chemin jusqu'à la fin
-    if (element->caseSuivante != NULL) { //! Je ne sais pas si on doit faire ça ou un simple if (dans le deuxième cas if faut refaire un peu le code) 
+    if (element != NULL) { //! Je ne sais pas si on doit faire ça ou un simple if (dans le deuxième cas if faut refaire un peu le code) 
                                             //* Je penche plutôt pour un if
 
         attaque = false;
@@ -194,6 +194,7 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi
             attaquerEntite(entite, listeEntite->entites[largeur / 2][hauteur / 2][0]);
             if (listeEntite->entites[largeur / 2][hauteur / 2][0]->pointsVie <= 0) {
                 //TODO On détruit le nexus et le joueur à perdu
+                *defeat = true;
                 return;
             }
             // continue;
@@ -242,7 +243,7 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi
         // On déplace l'unité ennemie
         deplacementEntite(entite, (Coordonnees) {xSuivant, ySuivant}, m, listeEntite);
 
-        entite->element = element->caseSuivante;
+        entite->element = entite->element->caseSuivante;
         // element = element->caseSuivante;
         
     }

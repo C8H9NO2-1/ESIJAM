@@ -35,6 +35,7 @@ struct argUniteEnnemie {
     map *m;
     CheminEnnemi *chemin;
     bool *fin;
+    bool *defeat;
 };
 typedef struct argUniteEnnemie argUniteEnnemie;
 //Fonction qui est executer dans un autre thread que le principal et qui permet d'afficher selon des FPS
@@ -81,9 +82,15 @@ void *unite(void *data) {
     map *m = arg->m;
     CheminEnnemi *chemin = arg->chemin;
     bool *fin = arg->fin;
+    bool *defeat = arg->defeat;
 
-    while (running) {
-        uniteEnnemie(entite, listeEntite, m, chemin, NULL);
+    while (*running && !(*defeat)) {
+        Uint64 frame_start = SDL_GetTicks64();
+
+        uniteEnnemie(entite, listeEntite, m, chemin, defeat);
+
+        while(SDL_GetTicks64() - frame_start < 1000 / 5)
+            SDL_Delay(1);
     }
 
     *fin = true;
@@ -141,7 +148,7 @@ int jeu(SDL_Window *window, parametre *para){
     // printf("Arrivée: x = %d / y = %d\n", arrivee.x, arrivee.y);
 
     ListeCheminsEnnemis *listeCheminsEnnemis = calculeCheminsEnnemis(graphe, *M);
-    // entite->element = listeCheminsEnnemis->chemin1->premier;
+    entite->element = listeCheminsEnnemis->chemin1->premier;
 
 
     printf("Premier chemin: \n");
@@ -178,8 +185,9 @@ int jeu(SDL_Window *window, parametre *para){
 
     //!========== Fin du Test ==========
 
+    bool defeat = false;
     bool finEntite = false;
-    argUniteEnnemie arguments = {&running, entite, listeEntite, M, listeCheminsEnnemis->chemin1, &finEntite};
+    argUniteEnnemie arguments = {&running, entite, listeEntite, M, listeCheminsEnnemis->chemin1, &finEntite, &defeat};
     pthread_t threadEnnemi1;
     pthread_create(&threadEnnemi1, NULL, unite, &arguments);
 
@@ -216,14 +224,15 @@ int jeu(SDL_Window *window, parametre *para){
                 }
                 break;
         
-        default:
-        break;
+            default:
+                break;
         }
         eventListe_ui(l, &e);
 
         }
     //Attente de fin d'execution du second thread
-    while(fin != true) SDL_Delay(50);
+    while(!fin) SDL_Delay(50);
+    while(!finEntite) SDL_Delay(50);
     
 
     freeListe_ui(l);
