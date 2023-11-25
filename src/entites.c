@@ -42,6 +42,13 @@ ListeEntite* initialiserListeEntite(map m) {
         }
     }
 
+    // for (int i = 0; i < largeur; i++) {
+    //     for (int j = 0; j < hauteur; j++) {
+    //         listeEntite->entites[i][j][0] = NULL;
+    //         listeEntite->entites[i][j][1] = NULL;
+    //     }
+    // }
+
     // On déclare une entitée vide dans chaque case
     Entite *entiteVide = (Entite *) malloc(sizeof(Entite));
     entiteVide->pointsVie = -1;
@@ -81,7 +88,7 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
     entite->coordonnees = coordonnees;
     entite->typeEntite = typeEntite;
     entite->texture = (texture_entite *) malloc(sizeof(texture_entite));
-    entite->element = (ElementCheminEnnemi *) malloc(sizeof(ElementCheminEnnemi));
+    entite->element = (ElementChemin *) malloc(sizeof(ElementChemin));
 
     // Si l'entite est une unite
     if (typeEntite == UNITE) {
@@ -98,13 +105,15 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
 
         listeEntite->entites[coordonnees.x][coordonnees.y][1] = entite;
     }
+
+    printf("Entité initialisée\n");
 }
 
 void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
     if (entite->typeEntite == UNITE) {
-        listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][0] = NULL;
+        listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][0]->typeEntite = -1;
     } else {
-        listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][1] = NULL;
+        listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][1]->typeEntite = -1;
     }
 
     entite->pointsVie = -1;
@@ -114,8 +123,21 @@ void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
     entite->coordonnees.x = -1;
     entite->coordonnees.y = -1;
     
-    free(entite->texture);
-    free(entite->element);
+    // free(entite->texture);
+    // free(entite->element);
+}
+
+void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M){
+    // printf("==1\n");
+    for(int i = 0; i < M->largeur/2; i++){
+        // printf("==2\n");
+        for(int j = 0; j < M->hauteur/2; j++){
+            // printf("==3\n");
+            if(listeEntite->entites[i][j][0] != NULL)
+                afficherEntite(listeEntite->entites[i][j][0], renderer);
+        }
+    }
+
 }
 
 void afficherEntite(Entite *entite, SDL_Renderer *renderer) {
@@ -142,8 +164,16 @@ void afficherEntite(Entite *entite, SDL_Renderer *renderer) {
 
 void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m, ListeEntite *listeEntite) {
     if (entite->typeEntite == UNITE) {
+        // On déclare une entitée vide dans chaque case
+        Entite *entiteVide = (Entite *) malloc(sizeof(Entite));
+        entiteVide->pointsVie = -1;
+        entiteVide->pointsAttaque = -1;
+        entiteVide->allegeance = -1;
+        entiteVide->typeEntite = -1;
+        entiteVide->coordonnees = (Coordonnees) {-1, -1};
+
         // On met à jour la liste des entités
-        listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][0] = NULL;
+        listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][0] = entiteVide;
         listeEntite->entites[coordonnees.x][coordonnees.y][0] = entite;
 
         // On met à jour les coordonnées de l'entité
@@ -158,24 +188,26 @@ void attaquerEntite(Entite *entite, Entite *cible) {
 }
 
 //TODO Il faut peut-être ajouter un champ dans la structure d'une entité indiquant quel chemin cette entité emprunte (pas si on fait un thread pour chaque unité)
-void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi *chemin, bool *defeat) {
+void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, bool *defeat, bool *exist) {
     int largeur = m->largeur / 2;
     int hauteur = m->hauteur / 2;
 
-    ElementCheminEnnemi *element = entite->element;
+    ElementChemin *element = entite->element;
     // ElementCheminEnnemi *element = chemin->premier;
 
     bool attaque = false;
-
+    printf("Test\n");
+    
     // On parcourt le chemin jusqu'à la fin
-    if (element != NULL) { //! Je ne sais pas si on doit faire ça ou un simple if (dans le deuxième cas if faut refaire un peu le code) 
-                                            //* Je penche plutôt pour un if
+    if (element->caseSuivante != NULL) { //! Je ne sais pas si on doit faire ça ou un simple if (dans le deuxième cas if faut refaire un peu le code) 
+          //printf("OK o\n");                                  //* Je penche plutôt pour un if
 
         attaque = false;
 
         //Si l'entité est détruite on sort de la fonction
         if (entite->pointsVie <= 0) {
             detruireEntite(entite, listeEntite);
+            *exist = false;
             return;
         }
         // On récupère les coordonnées de l'entité
@@ -240,12 +272,82 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi
             }
         }
 
-        // On déplace l'unité ennemie
-        deplacementEntite(entite, (Coordonnees) {xSuivant, ySuivant}, m, listeEntite);
+        // On déplace l'unité ennemie si il n'y a pas d'autres unités sur cette case
+        if (listeEntite->entites[xSuivant][ySuivant][0]->typeEntite == -1) {
+            deplacementEntite(entite, (Coordonnees) {xSuivant, ySuivant}, m, listeEntite);
+            entite->element = entite->element->caseSuivante;
+            // element = element->caseSuivante;
+        }
+    }
+}
 
-        entite->element = entite->element->caseSuivante;
-        // element = element->caseSuivante;
-        
+void nouveauCheminAmi(Entite *entite, ListeEntite *listeEntite, map *m, Graphe graphe, Coordonnees destination) {
+    CheminAmi *chemin = calculeCheminAmi(entite->coordonnees, destination, graphe, *m);
+    entite->element = chemin->premier;
+    if (!chemin->valide) {
+        entite->element->caseSuivante = NULL;
+        printf("Chemin invalide\n");
+    }
+}
+
+void uniteAmie(Entite *entite, ListeEntite *listeEntite, map *m, bool *exist) {
+    int largeur = m->largeur / 2;
+    int hauteur = m->hauteur / 2;
+
+    ElementChemin *element = entite->element;
+
+    bool attaque = false;
+    
+    // On parcourt le chemin jusqu'à la fin
+    if (element->caseSuivante->caseSuivante != NULL) {
+
+        attaque = false;
+
+        //Si l'entité est détruite on sort de la fonction
+        if (entite->pointsVie <= 0) {
+            detruireEntite(entite, listeEntite);
+            *exist = false;
+            return;
+        }
+        // On récupère les coordonnées de l'entité
+        int x = entite->coordonnees.x;
+        int y = entite->coordonnees.y;
+
+        // Si une unité alliée est à proximité de l'allié, on l'attaque
+        // On en attaque une à la fois
+        for (int i = -1; i <= 1; i++) {
+            if (x + i >= 0 && x + i < largeur) {
+                for (int j = -1; j <= 1; j++) {
+                    if (y + j >= 0 && y + j < hauteur) {
+                        if (listeEntite->entites[x+i][y+j][0] != NULL) {
+                            if (listeEntite->entites[x+i][y+j][0]->allegeance == ENNEMI) {
+                                attaquerEntite(entite, listeEntite->entites[x+i][y+j][0]);
+                                attaque = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (attaque) {
+            // continue;
+            return;
+        }
+
+        // On récupère les coordonnées de la case suivante
+        int xSuivant = element->caseSuivante->coordonnees.x;
+        int ySuivant = element->caseSuivante->coordonnees.y;
+
+        // SDL_Delay(1000);
+        printf("xSuivant = %d / ySuivant = %d\n", xSuivant, ySuivant);
+
+        // On déplace l'unité ennemie si il n'y a pas d'autres unités sur cette case
+        if (listeEntite->entites[xSuivant][ySuivant][0]->typeEntite == -1) {
+            deplacementEntite(entite, (Coordonnees) {xSuivant, ySuivant}, m, listeEntite);
+            entite->element = entite->element->caseSuivante;
+            // element = element->caseSuivante;
+        }
     }
 }
 

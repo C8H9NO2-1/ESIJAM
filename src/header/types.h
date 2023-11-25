@@ -9,15 +9,21 @@ struct Coordonnees {
 };
 
 //========== Chemin ==========
-typedef struct ElementCheminEnnemi ElementCheminEnnemi;
-struct ElementCheminEnnemi {
+typedef struct ElementChemin ElementChemin;
+struct ElementChemin {
     Coordonnees coordonnees;
-    ElementCheminEnnemi *caseSuivante;
+    ElementChemin *caseSuivante;
+};
+
+typedef struct CheminAmi CheminAmi;
+struct CheminAmi {
+    ElementChemin *premier;
+    bool valide; // Utile pour savoir si l'on peut envoyer une unité sur ce chemin ou non
 };
 
 typedef struct CheminEnnemi CheminEnnemi;
 struct CheminEnnemi {
-    ElementCheminEnnemi *premier;
+    ElementChemin *premier;
 };
 
 typedef struct ListeCheminsEnnemis ListeCheminsEnnemis;
@@ -63,7 +69,7 @@ struct Entite {
     Coordonnees coordonnees;
     texture_entite *texture;
 
-    ElementCheminEnnemi *element;
+    ElementChemin *element;
 };
 
 // Dans la première case du dernier tableau on met les unités et dans la deuxième les pièges

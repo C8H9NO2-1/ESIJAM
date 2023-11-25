@@ -24,7 +24,7 @@ struct argAfficheVideo{
     map *M;
     bool *fin;
     ui_liste *l;
-    Entite *entite;
+    ListeEntite *listeEntite;
 };
 typedef struct argAfficheVideo argAfficheVideo;
 
@@ -33,11 +33,22 @@ struct argUniteEnnemie {
     Entite *entite;
     ListeEntite *listeEntite;
     map *m;
-    CheminEnnemi *chemin;
     bool *fin;
     bool *defeat;
+    bool *exist;
 };
 typedef struct argUniteEnnemie argUniteEnnemie;
+
+struct argUniteAllie {
+    bool *running;
+    Entite *entite;
+    ListeEntite *listeEntite;
+    map *m;
+    bool *fin;
+    bool *defeat;
+    bool *exist;
+};
+typedef struct argUniteAllie argUniteAllie;
 //Fonction qui est executer dans un autre thread que le principal et qui permet d'afficher selon des FPS
 void *afficheVideo(void *data){
     argAfficheVideo *arg = (argAfficheVideo*) data;
@@ -50,7 +61,7 @@ void *afficheVideo(void *data){
     bool* fin = arg->fin;
     ui_liste *l = arg->l;
 
-    Entite *entite = arg->entite;
+    ListeEntite *listeEntite = arg->listeEntite;
 
     while(*running) {
         Uint64 frame_start = SDL_GetTicks64();
@@ -60,10 +71,13 @@ void *afficheVideo(void *data){
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0x00);
 
         SDL_RenderFillRect(renderer, NULL);
-
-        afficheMapCamera(cam, M, renderer, tM);
-        afficherListe_ui(l, renderer); 
+        printf("OK !\n");
+        afficheMapCamera(cam, M, renderer, tM, listeEntite);
+        printf("OK 1\n");
+        afficherListe_ui(l, renderer);
+        printf("OK 2\n"); 
         SDL_RenderPresent(renderer);
+        printf("OK 3\n");
 
         while(SDL_GetTicks64() - frame_start < 1000 / (Uint64)para->FPS)
             SDL_Delay(1 /* ms */);
@@ -80,14 +94,37 @@ void *unite(void *data) {
     Entite *entite = arg->entite;
     ListeEntite *listeEntite = arg->listeEntite;
     map *m = arg->m;
-    CheminEnnemi *chemin = arg->chemin;
     bool *fin = arg->fin;
     bool *defeat = arg->defeat;
+    bool *exist = arg->exist;
 
-    while (*running && !(*defeat)) {
+    while (*running && !(*defeat) && *exist) {
         Uint64 frame_start = SDL_GetTicks64();
 
-        uniteEnnemie(entite, listeEntite, m, chemin, defeat);
+        uniteEnnemie(entite, listeEntite, m, defeat, exist);
+
+        while(SDL_GetTicks64() - frame_start < 1000 / 5)
+            SDL_Delay(1);
+    }
+
+    *fin = true;
+    return NULL;
+}
+
+void *uniteAllie(void *data) {
+    argUniteAllie *arg = (argUniteAllie*) data;
+    bool *running = arg->running;
+    Entite *entite = arg->entite;
+    ListeEntite *listeEntite = arg->listeEntite;
+    map *m = arg->m;
+    bool *fin = arg->fin;
+    bool *defeat = arg->defeat;
+    bool *exist = arg->exist;
+
+    while (*running && !(*defeat) && *exist) {
+        Uint64 frame_start = SDL_GetTicks64();
+
+        uniteAmie(entite, listeEntite, m, exist);
 
         while(SDL_GetTicks64() - frame_start < 1000 / 5)
             SDL_Delay(1);
@@ -120,10 +157,13 @@ int jeu(SDL_Window *window, parametre *para){
     //!========== Code de Test ==========
 
     Entite *entite = malloc(sizeof(Entite));
+    Entite *allie = malloc(sizeof(Entite));
     ListeEntite *listeEntite = initialiserListeEntite(*M);
     initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 0}, listeEntite);
+    initialiserEntite(allie, AMI, UNITE, (Coordonnees) {M->largeur / 4 + 3, M->hauteur / 4 - 1}, listeEntite);
 
     chargerTextureEntite(entite->texture, "data/adventurer-Sheet.png", "data/adventurer-Sheet.png", renderer);
+    chargerTextureEntite(allie->texture, "data/adventurer-Sheet.png", "data/adventurer-Sheet.png", renderer);
 
     Graphe graphe = matriceAdjacences(*M, listeEntite);
 
@@ -151,51 +191,65 @@ int jeu(SDL_Window *window, parametre *para){
     entite->element = listeCheminsEnnemis->chemin1->premier;
 
 
-    printf("Premier chemin: \n");
-    ElementCheminEnnemi *element = listeCheminsEnnemis->chemin1->premier;
-    while (element->caseSuivante != NULL) {
-        printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
-        element = element->caseSuivante;
-    }
-    printf("\n");
+    // printf("Premier chemin: \n");
+    // ElementCheminEnnemi *element = listeCheminsEnnemis->chemin1->premier;
+    // while (element->caseSuivante != NULL) {
+    //     printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
+    //     element = element->caseSuivante;
+    // }
+    // printf("\n");
 
-    printf("Deuxième chemin: \n");
-    element = listeCheminsEnnemis->chemin2->premier;
-    while (element->caseSuivante != NULL) {
-        printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
-        element = element->caseSuivante;
-    }
-    printf("\n");
+    // printf("Deuxième chemin: \n");
+    // element = listeCheminsEnnemis->chemin2->premier;
+    // while (element->caseSuivante != NULL) {
+    //     printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
+    //     element = element->caseSuivante;
+    // }
+    // printf("\n");
 
-    printf("Troisième chemin: \n");
-    element = listeCheminsEnnemis->chemin3->premier;
-    while (element->caseSuivante != NULL) {
-        printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
-        element = element->caseSuivante;
-    }
-    printf("\n");
+    // printf("Troisième chemin: \n");
+    // element = listeCheminsEnnemis->chemin3->premier;
+    // while (element->caseSuivante != NULL) {
+    //     printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
+    //     element = element->caseSuivante;
+    // }
+    // printf("\n");
 
-    printf("Quatrième chemin: \n");
-    element = listeCheminsEnnemis->chemin4->premier;
-    while (element->caseSuivante != NULL) {
-        printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
-        element = element->caseSuivante;
-    }
-    printf("\n");
+    // printf("Quatrième chemin: \n");
+    // element = listeCheminsEnnemis->chemin4->premier;
+    // while (element->caseSuivante != NULL) {
+    //     printf("x : %d / y : %d\n", element->coordonnees.x, element->coordonnees.y);
+    //     element = element->caseSuivante;
+    // }
+    // printf("\n");
 
     //!========== Fin du Test ==========
 
     bool defeat = false;
     bool finEntite = false;
-    argUniteEnnemie arguments = {&running, entite, listeEntite, M, listeCheminsEnnemis->chemin1, &finEntite, &defeat};
+    bool existEntite1 = true;
+    argUniteEnnemie arguments = {&running, entite, listeEntite, M, &finEntite, &defeat, &existEntite1};
     pthread_t threadEnnemi1;
     pthread_create(&threadEnnemi1, NULL, unite, &arguments);
+
+    bool finEntite2 = false;
+    bool existEntite2 = true;
+    argUniteAllie arguments2 = {&running, allie, listeEntite, M, &finEntite2, &defeat, &existEntite2};
+    pthread_t threadAllie1;
+    pthread_create(&threadAllie1, NULL, uniteAllie, &arguments2);
+
+    nouveauCheminAmi(allie, listeEntite, M, graphe, (Coordonnees) {M->largeur / 4, 1});
+    // printf("Premier chemin: \n");
+    // while (allie->element->caseSuivante != NULL) {
+    //     printf("x : %d / y : %d\n", allie->element->coordonnees.x, allie->element->coordonnees.y);
+    //     allie->element = allie->element->caseSuivante;
+    // }
 
     float zoomMin = zoomMinDetermination(M, para);
 
     //Execution du second thread pour la video
     camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, zoomMin, LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
-    argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin, l};
+    argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin, l, listeEntite};
     pthread_t threadVideo;
     pthread_create(&threadVideo, NULL, afficheVideo, &arg);
   
@@ -233,6 +287,7 @@ int jeu(SDL_Window *window, parametre *para){
     //Attente de fin d'execution du second thread
     while(!fin) SDL_Delay(50);
     while(!finEntite) SDL_Delay(50);
+    while(!finEntite2) SDL_Delay(50);
     
 
     freeListe_ui(l);

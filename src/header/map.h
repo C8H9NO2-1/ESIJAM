@@ -23,7 +23,7 @@ void freeMap(map *m);
 uMap recupCaseMap(map *m, int x, int y);
 void afficheMap(map *m, SDL_Renderer *renderer, texture_map *tM);
 map* generateurDeMap(int w, int h, int xBase, int yBase, int wBase, int hBase, int nbWay, int lengthWay, int seed, texture_map *tM);
-void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *tM);
+void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *tM, ListeEntite *lE);
 map* lecturePseudoMap(const char* nom_fichier, texture_map* tM, int seed);
 
 float zoomMinDetermination(map* M, parametre *para);
