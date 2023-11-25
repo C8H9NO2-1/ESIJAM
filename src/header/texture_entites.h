@@ -19,6 +19,8 @@
  */
 void chargerTextureEntite(texture_entite **ptE, const char *fichier, const char *fichierSelect, SDL_Renderer *renderer); //! Il sera peut être nécessaire de passer un seul fichier en paramètre, dépendant de comment Tym fait les fichiers
 
+void chargerTextureNexus(texture_entite **ptE, const char *fichier, SDL_Renderer *renderer);
+
 void chargerTexturePiege1(texture_entite **ptE, const char *fichier, SDL_Renderer *renderer);
 void chargerTexturePiege2(texture_entite **ptE, const char *fichier, SDL_Renderer *renderer);
 

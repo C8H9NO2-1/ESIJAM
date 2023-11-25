@@ -127,9 +127,7 @@ void *ami(void *data) {
             SDL_Delay(1);
     }
 
-    printf("Fin du thread\n");
 
-    // *fin = true;
     return NULL;
 }
 
@@ -158,6 +156,7 @@ void *phase(void *data){
     bool *running = argu->running;
     int *PV_poulpy = argu->PV_poulpy;
     bool *fin = argu->fin;
+
     while(*running){
         if(*periodePause){
             *nombreDEnnemie *= (*tauxDEnnemisEntreVague);
@@ -167,7 +166,7 @@ void *phase(void *data){
             (*numeroDeVague)++;
         }
         else{
-            if(((*nombreDEnnemieRestant) < 0) || (*PV_poulpy < 0)){
+            if(((*nombreDEnnemieRestant) <= 0) || (*PV_poulpy < 0)){
                 *periodePause = true;
                 if(*PV_poulpy <= 0){
                     *running = false;
@@ -334,7 +333,7 @@ int jeu(SDL_Window *window, parametre *para){
     chargerTextureEntite(&tE_allie, "data/texture/sprite.png", "data/texture/sprite3.png", renderer);
 
     texture_entite *textureNexus;
-    chargerTextureEntite(&textureNexus, "data/texture/betaNexus.png", "data/texture/sprite2.png", renderer);
+    chargerTextureNexus(&textureNexus, "data/texture/betaNexus.png", renderer);
 
     texture_entite *texturePiege1;
     chargerTexturePiege1(&texturePiege1, "data/texture/piege1.png", renderer);

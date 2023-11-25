@@ -149,9 +149,12 @@ void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
 void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M, camera *cam){
     for(int i = 0; i < M->largeur/2; i++){
         for(int j = 0; j < M->hauteur/2; j++){
-            if(listeEntite->entites[i][j][0] != NULL)
+            if(listeEntite->entites[i][j][0] != NULL) {
                 afficherEntite(listeEntite->entites[i][j][1], renderer, cam);
+            }
+            if(listeEntite->entites[i][j][1] != NULL) {
                 afficherEntite(listeEntite->entites[i][j][0], renderer, cam);
+            }
         }
     }
 }
