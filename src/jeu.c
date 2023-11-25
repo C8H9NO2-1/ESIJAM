@@ -156,16 +156,13 @@ void *phase(void *data){
     while(*running){
         if(*periodePause){
             *nombreDEnnemie *= (*tauxDEnnemisEntreVague);
-            printf("OK phase !\n");
             SDL_Delay((*dureeEntreChaqueVague)*60*1000);
-            printf("Pause fini !\n");
             *nombreDEnnemieRestant = *nombreDEnnemie;
             *periodePause = false; 
             (*numeroDeVague)++;
         }
         else{
-            printf("Phase de non pause !\n");
-            if(*nombreDEnnemieRestant > 0 && *PV_poulpy > 0){
+            if(((*nombreDEnnemieRestant) < 0) || (*PV_poulpy < 0)){
                 *periodePause = true;
                 if(*PV_poulpy <= 0){
                     *running = false;
@@ -215,7 +212,7 @@ void *ajoutEnnemi(void *data){
             nbUniteAFaireApparaitre = *nombreEnnemie;
             SDL_Delay(50);
         }
-        else{
+        else if(nbUniteAFaireApparaitre > 0){
             Entite *entite = malloc(sizeof(Entite));
             bool *finEntite = malloc(sizeof(bool));
             *finEntite = false;
@@ -229,12 +226,12 @@ void *ajoutEnnemi(void *data){
                     pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
                     break;
                 case 1:
-                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 2, M->hauteur / 4}, listeEntite, tE);
+                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {24, M->hauteur / 4}, listeEntite, tE);
                     entite->element = listeCheminsEnnemis->chemin2->premier;
                     pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
                     break;
                 case 2:
-                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, M->hauteur / 2}, listeEntite, tE);
+                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 24}, listeEntite, tE);
                     entite->element = listeCheminsEnnemis->chemin3->premier;
                     pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
                     break;
@@ -247,6 +244,9 @@ void *ajoutEnnemi(void *data){
             }
             nbUniteAFaireApparaitre--;
             SDL_Delay(5000);
+        }
+        else{
+            SDL_Delay(5);
         }
     }
     *fin = true;
@@ -276,12 +276,12 @@ int jeu(SDL_Window *window, parametre *para){
     //!========================== Fin système de monnaie ============
     //!=========================== Système de Vague =================
     int numeroDeVague =1;
-    float dureeEntreChaqueVague = 0.1;//En minute
+    float dureeEntreChaqueVague = 35./60.;//En minute
     int nombreDEnnemie = 5;
     float tauxDEnnemisEntreVague = 1.2;
     bool periodePause = true;
 
-    int nombreDEnnemieRestant = 0;
+    int nombreDEnnemieRestant = 5;
 
     //!========================== Fin système de Vague ================
     //----------------------------------------Teste UI----------------
@@ -293,15 +293,9 @@ int jeu(SDL_Window *window, parametre *para){
 
     //!========== Code de Test ==========
 
-    Entite *entite = malloc(sizeof(Entite));
-    Entite *entite2 = malloc(sizeof(Entite));
-    Entite *entite3 = malloc(sizeof(Entite));
     ListeEntite *listeEntite = initialiserListeEntite(*M);
     texture_entite *tE;
     chargerTextureEntite(&tE, "data/texture/sprite.png", "data/texture/sprite.png", renderer);
-    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 0}, listeEntite, tE);
-    initialiserEntite(entite2, ENNEMI, UNITE, (Coordonnees) {M->largeur / 2 - 1, M->hauteur / 4}, listeEntite, tE);
-    initialiserEntite(entite3, AMI, UNITE, (Coordonnees) {M->largeur / 4 + 3, M->hauteur / 4 - 1}, listeEntite, tE);
 
     // On met les points de vie du nexus très haut pour les tests
     listeEntite->entites[M->largeur / 4][M->hauteur / 4][0]->pointsVie = 1000000;
@@ -309,30 +303,8 @@ int jeu(SDL_Window *window, parametre *para){
     Graphe graphe = matriceAdjacences(*M, listeEntite);
 
     ListeCheminsEnnemis *listeCheminsEnnemis = calculeCheminsEnnemis(graphe, *M);
-    entite->element = listeCheminsEnnemis->chemin1->premier;
-    entite2->element = listeCheminsEnnemis->chemin2->premier;
 
     //!========== Fin du Test ==========
-
-    bool finEntite = false;
-    argUniteEnnemie arguments = {&running, entite, listeEntite, M, &finEntite, &defeat, &nombreDEnnemieRestant};
-    pthread_t threadEnnemi1;
-    pthread_create(&threadEnnemi1, NULL, ennemi, &arguments);
-
-
-    bool finEntite2 = false;
-    argUniteEnnemie arguments2 = {&running, entite2, listeEntite, M, &finEntite2, &defeat, &nombreDEnnemieRestant};
-    pthread_t threadEnnemi2;
-    pthread_create(&threadEnnemi2, NULL, ennemi, &arguments2);
-
-    bool finEntite3 = false;
-    bool existEntite3 = true;
-    argUniteAllie arguments3 = {&running, entite3, listeEntite, M, &finEntite3, &defeat};
-    pthread_t threadAllie1;
-    // pthread_create(&threadAllie1, NULL, ami, &arguments3);
-
-    nouveauCheminAmi(entite3, listeEntite, M, graphe, (Coordonnees) {M->largeur / 4, 1});
-
     float zoomMin = zoomMinDetermination(M, para);
 
     //Execution du thread pour les phases

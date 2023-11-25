@@ -85,17 +85,16 @@ void freeListeEntite(ListeEntite *listeEntite, map m) {
 
 void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite, texture_entite *texture) {
     // On initialise les variables qui ne dépendent pas du type d'entite avec lequel on travaille
+    
     entite->coordonnees = coordonnees;
     entite->typeEntite = typeEntite;
     entite->texture = texture;
     entite->element = (ElementChemin *) malloc(sizeof(ElementChemin));
-
     // Si l'entite est une unite
     if (typeEntite == UNITE) {
         entite->pointsVie = POINTS_DE_VIE_INITIAUX;
         entite->pointsAttaque = POINTS_ATTAQUE;
         entite->allegeance = allegeance;
-
         listeEntite->entites[coordonnees.x][coordonnees.y][0] = entite;
 
     } else { // Si l'entite est un piege
@@ -105,8 +104,6 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
 
         listeEntite->entites[coordonnees.x][coordonnees.y][1] = entite;
     }
-
-    printf("Entité initialisée\n");
 }
 
 void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
