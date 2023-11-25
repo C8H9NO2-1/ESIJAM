@@ -91,14 +91,40 @@ void attaquerEntite(Entite *entite, Entite *cible);
  * @param entite Pointeur vers l'entité à gérer
  * @param listeEntite Pointeur vers la liste des entités
  * @param m Pointeur vers la carte
- * @param chemin Pointeur vers la liste des chemins des ennemis
- * @param renderer Pointeur vers le renderer
+ * @param defeat Pointeur indiquant si le joueur a perdu ou non
+ * @param exist Pointeur indiquant si l'unité existe toujours ou non
  */
-void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi *chemin, SDL_Renderer *renderer);
+void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, bool *defeat, bool *exist);
 
-/*
-    Permet d'afficher les unitées présent dans la liste
-*/
+/**
+ * @brief Fonction qui calcule le chemin d'une unité amie
+ * 
+ * @param entite Entité pour laquelle on calcule le chemin
+ * @param listeEntite Pointeur vers la liste des entités
+ * @param m Pointeur vers la carte
+ * @param graphe Graphe de la carte
+ * @param destination Destination donnée par le joueur
+ */
+void nouveauCheminAmi(Entite *entite, ListeEntite *listeEntite, map *m, Graphe graphe, Coordonnees destination);
+
+/**
+ * @brief Fonction qui gère une unitée alliée, c'est-à-dire qui la fait se deplacer et la fait attaquer
+ * 
+ * @param entite Pointeur vers l'entité à gérer
+ * @param listeEntite Pointeur vers la liste des entités
+ * @param m Pointeur vers la carte
+ * @param exist Pointeur indiquant si l'unité existe toujours ou non
+ */
+void uniteAmie(Entite *entite, ListeEntite *listeEntite, map *m, bool *exist);
+
+/**
+ * @brief Fonction qui permet d'afficher toutes les entités
+ * 
+ * @param listeEntite Liste des entités à afficher
+ * @param renderer Pointeur vers le rendu avec lequel on affiche les unités
+ * @param M Carte du jeu
+ * @param cam Pointeur vers la caméra
+ */
 void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M, camera *cam);
 
 //========== Fin Entité ==========

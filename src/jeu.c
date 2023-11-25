@@ -28,10 +28,22 @@ struct argUniteEnnemie {
     Entite *entite;
     ListeEntite *listeEntite;
     map *m;
-    CheminEnnemi *chemin;
     bool *fin;
+    bool *defeat;
+    bool *exist;
 };
 typedef struct argUniteEnnemie argUniteEnnemie;
+
+struct argUniteAllie {
+    bool *running;
+    Entite *entite;
+    ListeEntite *listeEntite;
+    map *m;
+    bool *fin;
+    bool *defeat;
+    bool *exist;
+};
+typedef struct argUniteAllie argUniteAllie;
 //Fonction qui est executer dans un autre thread que le principal et qui permet d'afficher selon des FPS
 void *afficheVideo(void *data){
     argAfficheVideo *arg = (argAfficheVideo*) data;
@@ -67,19 +79,43 @@ void *afficheVideo(void *data){
     return NULL;
 }
 
-void *unite(void *data) {
+void *ennemi(void *data) {
     argUniteEnnemie *arg = (argUniteEnnemie*) data;
     bool *running = arg->running;
     Entite *entite = arg->entite;
     ListeEntite *listeEntite = arg->listeEntite;
     map *m = arg->m;
-    CheminEnnemi *chemin = arg->chemin;
     bool *fin = arg->fin;
+    bool *defeat = arg->defeat;
+    bool *exist = arg->exist;
 
-    while (*running) {
+    while (*running && !(*defeat) && *exist) {
         Uint64 frame_start = SDL_GetTicks64();
 
-        uniteEnnemie(entite, listeEntite, m, chemin, NULL);
+        uniteEnnemie(entite, listeEntite, m, defeat, exist);
+
+        while(SDL_GetTicks64() - frame_start < 1000 / 5)
+            SDL_Delay(1);
+    }
+
+    *fin = true;
+    return NULL;
+}
+
+void *ami(void *data) {
+    argUniteAllie *arg = (argUniteAllie*) data;
+    bool *running = arg->running;
+    Entite *entite = arg->entite;
+    ListeEntite *listeEntite = arg->listeEntite;
+    map *m = arg->m;
+    bool *fin = arg->fin;
+    bool *defeat = arg->defeat;
+    bool *exist = arg->exist;
+
+    while (*running && !(*defeat) && *exist) {
+        Uint64 frame_start = SDL_GetTicks64();
+
+        uniteAmie(entite, listeEntite, m, exist);
 
         while(SDL_GetTicks64() - frame_start < 1000 / 5)
             SDL_Delay(1);
@@ -167,28 +203,46 @@ int jeu(SDL_Window *window, parametre *para){
 
     Entite *entite = malloc(sizeof(Entite));
     Entite *entite2 = malloc(sizeof(Entite));
+    Entite *entite3 = malloc(sizeof(Entite));
     ListeEntite *listeEntite = initialiserListeEntite(*M);
     texture_entite *tE;
     chargerTextureEntite(&tE, "data/texture/sprite.png", "data/texture/sprite.png", renderer);
     initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 0}, listeEntite, tE);
+    initialiserEntite(entite2, ENNEMI, UNITE, (Coordonnees) {M->largeur / 2 - 1, M->hauteur / 4}, listeEntite, tE);
+    initialiserEntite(entite3, AMI, UNITE, (Coordonnees) {M->largeur / 4 + 3, M->hauteur / 4 - 1}, listeEntite, tE);
 
+    // On met les points de vie du nexus très haut pour les tests
+    listeEntite->entites[M->largeur / 4][M->hauteur / 4][0]->pointsVie = 1000000;
 
     Graphe graphe = matriceAdjacences(*M, listeEntite);
 
     ListeCheminsEnnemis *listeCheminsEnnemis = calculeCheminsEnnemis(graphe, *M);
     entite->element = listeCheminsEnnemis->chemin1->premier;
+    entite2->element = listeCheminsEnnemis->chemin2->premier;
 
     //!========== Fin du Test ==========
 
+    bool defeat = false;
     bool finEntite = false;
-    argUniteEnnemie arguments = {&running, entite, listeEntite, M, listeCheminsEnnemis->chemin1, &finEntite};
+    bool existEntite1 = true;
+    argUniteEnnemie arguments = {&running, entite, listeEntite, M, &finEntite, &defeat, &existEntite1};
     pthread_t threadEnnemi1;
-    pthread_create(&threadEnnemi1, NULL, unite, &arguments);
+    pthread_create(&threadEnnemi1, NULL, ennemi, &arguments);
 
 
     bool finEntite2 = false;
-    argUniteEnnemie arguments2 = {&running, entite2, listeEntite, M, listeCheminsEnnemis->chemin3, &finEntite2};
+    bool existEntite2 = true;
+    argUniteEnnemie arguments2 = {&running, entite2, listeEntite, M, &finEntite2, &defeat, &existEntite2};
     pthread_t threadEnnemi2;
+    pthread_create(&threadEnnemi2, NULL, ennemi, &arguments2);
+
+    bool finEntite3 = false;
+    bool existEntite3 = true;
+    argUniteAllie arguments3 = {&running, entite3, listeEntite, M, &finEntite3, &defeat, &existEntite3};
+    pthread_t threadAllie1;
+    // pthread_create(&threadAllie1, NULL, ami, &arguments3);
+
+    nouveauCheminAmi(entite3, listeEntite, M, graphe, (Coordonnees) {M->largeur / 4, 1});
 
     float zoomMin = zoomMinDetermination(M, para);
     //Execution du second thread pour la video
@@ -251,10 +305,11 @@ int jeu(SDL_Window *window, parametre *para){
             eventListe_ui(l, &e);
         }
     }
-    //Attente de fin d'execution des autres threads
-    while(fin != true) SDL_Delay(50);
-    while(finEntite != true) SDL_Delay(50);
-    //while(finEntite2 != true) SDL_Delay(50);
+    //Attente de fin d'execution du second thread
+    while(!fin) SDL_Delay(50);
+    // while(!finEntite) SDL_Delay(50);
+    // while(!finEntite2) SDL_Delay(50);
+    // while(!finEntite3) SDL_Delay(50);
     
 
     freeListe_ui(l);

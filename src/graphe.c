@@ -44,7 +44,7 @@ Graphe matriceAdjacences(map m, ListeEntite *listeEntite) {
         matriceAllie[i] = (int *) malloc(nbreLigne * sizeof(int));
     }
 
-    // On met toutes les cases à -INFINITY
+    // On met toutes les cases à -1
     for (int i = 0; i < nbreLigne; i++) {
         for (int j = 0; j < nbreLigne; j++) {
             matriceEnnemi1[i][j] = -1;
@@ -115,6 +115,28 @@ Graphe matriceAdjacences(map m, ListeEntite *listeEntite) {
         }
     }
 
+    //=========== Tout le monde ===========
+    // On met les cases des entrées à -1
+    int idEntree1 = identifiantCase((Coordonnees) {largeur / 2, 0}, m);
+    int idEntree2 = identifiantCase((Coordonnees) {largeur - 1, hauteur / 2}, m);
+    int idEntree3 = identifiantCase((Coordonnees) {largeur / 2, hauteur - 1}, m);
+    int idEntree4 = identifiantCase((Coordonnees) {0, hauteur / 2}, m);
+
+    matriceAllie[idEntree1 + largeur][idEntree1] = -1;
+    matriceAllie[idEntree2 - hauteur][idEntree2] = -1;
+    matriceAllie[idEntree3 - largeur][idEntree3] = -1;
+    matriceAllie[idEntree4 + hauteur][idEntree4] = -1;
+
+    matriceEnnemi1[idEntree1 + largeur][idEntree1] = -1;
+    matriceEnnemi1[idEntree2 - hauteur][idEntree2] = -1;
+    matriceEnnemi1[idEntree3 - largeur][idEntree3] = -1;
+    matriceEnnemi1[idEntree4 + hauteur][idEntree4] = -1;
+
+    matriceEnnemi2[idEntree1 + largeur][idEntree1] = -1;
+    matriceEnnemi2[idEntree2 - hauteur][idEntree2] = -1;
+    matriceEnnemi2[idEntree3 - largeur][idEntree3] = -1;
+    matriceEnnemi2[idEntree4 + hauteur][idEntree4] = -1;
+
     // SDL_Delay(100);
     // printf("Calcul des matrices d'adjacences fait\n");
     // SDL_Delay(500);
@@ -161,7 +183,7 @@ CheminEnnemi *calculeCheminEnnemi(Coordonnees depart, Coordonnees arrivee, Graph
     int hauteur = m.hauteur / 2;
     
     CheminEnnemi *chemin = malloc(sizeof(*chemin));
-    ElementCheminEnnemi *element = malloc(sizeof(*element));
+    ElementChemin *element = malloc(sizeof(*element));
     element->coordonnees = depart;
     element->caseSuivante = NULL;
     chemin->premier = element;
@@ -306,6 +328,90 @@ CheminEnnemi *calculeCheminEnnemi(Coordonnees depart, Coordonnees arrivee, Graph
     return chemin;
 }
 
+CheminAmi *calculeCheminAmi(Coordonnees depart, Coordonnees arrivee, Graphe graphe, map m) {
+    int largeur = m.largeur / 2;
+    int hauteur = m.hauteur / 2;
+    
+    CheminAmi *chemin = malloc(sizeof(*chemin));
+    ElementChemin *element = malloc(sizeof(*element));
+    element->coordonnees = depart;
+    element->caseSuivante = NULL;
+    chemin->premier = element;
+    chemin->valide = true;
+
+
+    //========== Initialisation ==========
+    // On initialise le tableau des distances à l'infini sauf pour le départ
+    int *distance = malloc(sizeof(int) * graphe.nbreLigne);
+    for (int i = 0; i < graphe.nbreLigne; i++) {
+        distance[i] = INT_MAX;
+    }
+    int idDepart = identifiantCase(depart, m);
+    distance[idDepart] = 0;
+
+    // On initialise le tableau pour savoir si un sommet a déjà été visité
+    bool *dejaVu = malloc(sizeof(bool) * graphe.nbreLigne);
+    for (int i = 0; i < graphe.nbreLigne; i++) {
+        dejaVu[i] = false;
+    }
+
+    // On initialise le tableau des précédents à -1
+    int *precedent = malloc(sizeof(int) * graphe.nbreLigne);
+    for (int i = 0; i < graphe.nbreLigne; i++) {
+        precedent[i] = -1;
+    }
+
+    // On fait les dernières initialisations
+    int idArrivee = identifiantCase(arrivee, m);
+    int idSommet = idDepart;
+    Pile *pile = initialiserPile();
+    empiler(pile, idSommet);
+
+    //========== Algorithme de Dijkstra ==========
+    while (idSommet != idArrivee && !estPileVide(pile)) {
+        mettreAJourDistance(graphe.matriceAdjacenceAllie, distance, precedent, idSommet, m);
+
+        if (!dejaVu[idSommet]) {
+            empiler(pile, idSommet);
+        }
+        dejaVu[idSommet] = true;
+
+        idSommet = plusProcheVoisin(graphe.matriceAdjacenceAllie, dejaVu, idSommet, m);
+        if (idSommet == -1) {
+            idSommet = depiler(pile);
+        }
+
+        // printf("x = %d / y = %d\n", idSommet % largeur, idSommet / largeur);
+    }
+
+    if (idSommet == idArrivee) {
+        // On a trouvé un chemin
+        while (idSommet != idDepart) {
+            element = malloc(sizeof(*element));
+            element->coordonnees = (Coordonnees) {idSommet % largeur, idSommet / largeur};
+            element->caseSuivante = chemin->premier;
+            chemin->premier = element;
+            idSommet = precedent[idSommet];
+        }
+
+        element = malloc(sizeof(*element));
+        element->coordonnees = (Coordonnees) {idSommet % largeur, idSommet / largeur};
+        element->caseSuivante = chemin->premier;
+        chemin->premier = element;
+
+    } else {
+        // On indique que le chemin n'est pas valide
+        chemin->valide = false;
+    }
+
+    free(distance);
+    free(dejaVu);
+    free(precedent);
+    free(pile);
+
+    return chemin;
+}
+
 ListeCheminsEnnemis* calculeCheminsEnnemis(Graphe graphe, map m) {
     int largeur = m.largeur / 2;
     int hauteur = m.hauteur / 2;
@@ -355,28 +461,28 @@ void freeGraphe(Graphe graphe, map m) {
 
 void freeListeCheminsEnnemis(ListeCheminsEnnemis *listeCheminsEnnemis) {
     while (listeCheminsEnnemis->chemin1->premier != NULL) {
-        ElementCheminEnnemi *element = listeCheminsEnnemis->chemin1->premier;
+        ElementChemin *element = listeCheminsEnnemis->chemin1->premier;
         listeCheminsEnnemis->chemin1->premier = listeCheminsEnnemis->chemin1->premier->caseSuivante;
         free(element);
     }
     free(listeCheminsEnnemis->chemin1);
 
     while (listeCheminsEnnemis->chemin2->premier != NULL) {
-        ElementCheminEnnemi *element = listeCheminsEnnemis->chemin2->premier;
+        ElementChemin *element = listeCheminsEnnemis->chemin2->premier;
         listeCheminsEnnemis->chemin2->premier = listeCheminsEnnemis->chemin2->premier->caseSuivante;
         free(element);
     }
     free(listeCheminsEnnemis->chemin2);
 
     while (listeCheminsEnnemis->chemin3->premier != NULL) {
-        ElementCheminEnnemi *element = listeCheminsEnnemis->chemin3->premier;
+        ElementChemin *element = listeCheminsEnnemis->chemin3->premier;
         listeCheminsEnnemis->chemin3->premier = listeCheminsEnnemis->chemin3->premier->caseSuivante;
         free(element);
     }
     free(listeCheminsEnnemis->chemin3);
 
     while (listeCheminsEnnemis->chemin4->premier != NULL) {
-        ElementCheminEnnemi *element = listeCheminsEnnemis->chemin4->premier;
+        ElementChemin *element = listeCheminsEnnemis->chemin4->premier;
         listeCheminsEnnemis->chemin4->premier = listeCheminsEnnemis->chemin4->premier->caseSuivante;
         free(element);
     }

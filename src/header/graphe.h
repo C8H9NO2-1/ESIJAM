@@ -64,6 +64,18 @@ void mettreAJourDistance(int** matrice, int* distance, int *predecesseur, int id
 CheminEnnemi *calculeCheminEnnemi(Coordonnees depart, Coordonnees arrivee, Graphe graphe, map m);
 
 /**
+ * @brief Fonctino qui calcule un chemin dans un graphe
+ * 
+ * @param depart Coordonnées de départ du graphe
+ * @param arrivee Coordonnées d'arrivée du graphe
+ * @param graphe Structure contenant les matrices d'adjacences nécessaires
+ * @param m Map dont on a calculé la matrice d'adjacence
+ * 
+ * @return CheminAmi* Chemin calculé
+ */
+CheminAmi *calculeCheminAmi(Coordonnees depart, Coordonnees arrivee, Graphe graphe, map m);
+
+/**
  * @brief Fonction qui calcule les chemins des ennemis pour une map donnée
  * 
  * @param graphe Structure contenant les matrices d'adjacences nécessaires
