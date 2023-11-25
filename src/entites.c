@@ -199,8 +199,7 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, bool *defeat
     printf("Test\n");
     
     // On parcourt le chemin jusqu'à la fin
-    if (element->caseSuivante != NULL) { //! Je ne sais pas si on doit faire ça ou un simple if (dans le deuxième cas if faut refaire un peu le code) 
-          //printf("OK o\n");                                  //* Je penche plutôt pour un if
+    if (element->caseSuivante != NULL) {
 
         attaque = false;
 

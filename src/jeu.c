@@ -157,13 +157,16 @@ int jeu(SDL_Window *window, parametre *para){
     //!========== Code de Test ==========
 
     Entite *entite = malloc(sizeof(Entite));
+    Entite *entiteEnnemie2 = malloc(sizeof(Entite));
     Entite *allie = malloc(sizeof(Entite));
     ListeEntite *listeEntite = initialiserListeEntite(*M);
     initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 0}, listeEntite);
+    initialiserEntite(entiteEnnemie2, ENNEMI, UNITE, (Coordonnees) {M->largeur / 2 - 1, M->hauteur / 4}, listeEntite);
     initialiserEntite(allie, AMI, UNITE, (Coordonnees) {M->largeur / 4 + 3, M->hauteur / 4 - 1}, listeEntite);
 
     chargerTextureEntite(entite->texture, "data/adventurer-Sheet.png", "data/adventurer-Sheet.png", renderer);
     chargerTextureEntite(allie->texture, "data/adventurer-Sheet.png", "data/adventurer-Sheet.png", renderer);
+    chargerTextureEntite(entiteEnnemie2->texture, "data/adventurer-Sheet.png", "data/adventurer-Sheet.png", renderer);
 
     Graphe graphe = matriceAdjacences(*M, listeEntite);
 
@@ -189,6 +192,7 @@ int jeu(SDL_Window *window, parametre *para){
 
     ListeCheminsEnnemis *listeCheminsEnnemis = calculeCheminsEnnemis(graphe, *M);
     entite->element = listeCheminsEnnemis->chemin1->premier;
+    entiteEnnemie2->element = listeCheminsEnnemis->chemin2->premier;
 
 
     // printf("Premier chemin: \n");
@@ -237,6 +241,12 @@ int jeu(SDL_Window *window, parametre *para){
     argUniteAllie arguments2 = {&running, allie, listeEntite, M, &finEntite2, &defeat, &existEntite2};
     pthread_t threadAllie1;
     pthread_create(&threadAllie1, NULL, uniteAllie, &arguments2);
+
+    bool finEntite3 = false;
+    bool existEntite3 = true;
+    argUniteEnnemie argumentsEnnemi2 = {&running, entiteEnnemie2, listeEntite, M, &finEntite3, &defeat, &existEntite3};
+    pthread_t threadEnnemi2;
+    // pthread_create(&threadEnnemi2, NULL, unite, &argumentsEnnemi2);
 
     nouveauCheminAmi(allie, listeEntite, M, graphe, (Coordonnees) {M->largeur / 4, 1});
     // printf("Premier chemin: \n");
