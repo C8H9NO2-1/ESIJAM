@@ -134,7 +134,6 @@ void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map *
                 afficherEntite(listeEntite->entites[i][j][0], renderer, cam);
         }
     }
-
 }
 
 void afficherEntite(Entite *entite, SDL_Renderer *renderer, camera *cam) {
@@ -144,16 +143,16 @@ void afficherEntite(Entite *entite, SDL_Renderer *renderer, camera *cam) {
     switch (entite->typeEntite) {
     case UNITE:
         if (entite->allegeance == AMI) {
-            SDL_RenderCopy(renderer, entite->texture->textureAmi[0], NULL, &rect);
+            SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
         } else {
-            SDL_RenderCopy(renderer, entite->texture->textureEnnemi[0], NULL, &rect);
+            SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
         }
         break;
     case PIEGE1:
-        SDL_RenderCopy(renderer, entite->texture->texturePiege1[0], NULL, &rect);
+        SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
         break;
     case PIEGE2:
-        SDL_RenderCopy(renderer, entite->texture->texturePiege2[0], NULL, &rect);
+        SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
         break;
     default:
         break;
@@ -174,6 +173,17 @@ void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m, ListeEnt
         listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][0] = entiteVide;
         listeEntite->entites[coordonnees.x][coordonnees.y][0] = entite;
 
+        // On met le sprite de l'unité à jour en fonction de sa direction
+        if (entite->coordonnees.y < coordonnees.y) {
+            entite->indiceTexture = 0;
+        } else if (entite->coordonnees.y > coordonnees.y) {
+            entite->indiceTexture = 1;
+        } else if (entite->coordonnees.x > coordonnees.x) {
+            entite->indiceTexture = 2;
+        } else if (entite->coordonnees.x < coordonnees.x) {
+            entite->indiceTexture = 3;
+        }
+
         // On met à jour les coordonnées de l'entité
         entite->coordonnees = coordonnees;
     }
@@ -190,71 +200,68 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, bool *defeat
     int largeur = m->largeur / 2;
     int hauteur = m->hauteur / 2;
 
-    ElementChemin *element = entite->element;
+    // ElementChemin *element = entite->element;
     // ElementCheminEnnemi *element = chemin->premier;
 
-    bool attaque = false;
-    printf("Test\n");
-    
-    // On parcourt le chemin jusqu'à la fin
-    if (element->caseSuivante != NULL) {
+    // bool attaque = false;
 
-        attaque = false;
+    //Si l'entité est détruite on sort de la fonction
+    if (entite->pointsVie <= 0) {
+        detruireEntite(entite, listeEntite);
+        *exist = false;
+        return;
+    }
 
-        //Si l'entité est détruite on sort de la fonction
-        if (entite->pointsVie <= 0) {
-            detruireEntite(entite, listeEntite);
-            *exist = false;
+    // On récupère les coordonnées de l'entité
+    int x = entite->coordonnees.x;
+    int y = entite->coordonnees.y;
+
+    // Il faut prendre en compte le cas où la case actuelle est un piège
+    if (listeEntite->entites[x][y][1] != NULL) {
+        if (listeEntite->entites[x][y][1]->typeEntite == PIEGE2) {
+            attaquerEntite(listeEntite->entites[x][y][1], entite); // On se fait attaquer par le piège
+        }
+    }
+
+    // Si le nexus est à proximité, on l'attaque
+    if (entite->element->caseSuivante->coordonnees.x == largeur / 2 && entite->element->caseSuivante->coordonnees.y == hauteur / 2) {
+        attaquerEntite(entite, listeEntite->entites[largeur / 2][hauteur / 2][0]);
+        if (listeEntite->entites[largeur / 2][hauteur / 2][0]->pointsVie <= 0) {
+            //TODO On détruit le nexus et le joueur à perdu
+            detruireEntite(listeEntite->entites[largeur / 2][hauteur / 2][0], listeEntite);
+            *defeat = true;
             return;
         }
-        // On récupère les coordonnées de l'entité
-        int x = entite->coordonnees.x;
-        int y = entite->coordonnees.y;
+        // continue;
+        return;
+    }
 
-        // Il faut prendre en compte le cas où la case actuelle est un piège
-        if (listeEntite->entites[x][y][1] != NULL) {
-            if (listeEntite->entites[x][y][1]->typeEntite == PIEGE2) {
-                attaquerEntite(listeEntite->entites[x][y][1], entite); // On se fait attaquer par le piège
-            }
-        }
-
-        // Si le nexus est à proximité, on l'attaque
-        if (element->caseSuivante->coordonnees.x == largeur / 2 && element->caseSuivante->coordonnees.y == hauteur / 2) {
-            attaquerEntite(entite, listeEntite->entites[largeur / 2][hauteur / 2][0]);
-            if (listeEntite->entites[largeur / 2][hauteur / 2][0]->pointsVie <= 0) {
-                //TODO On détruit le nexus et le joueur à perdu
-                *defeat = true;
-                return;
-            }
-            // continue;
-            return;
-        }
-
-        // Si une unité alliée est à proximité de l'ennemi, on l'attaque
-        // On en attaque une à la fois
-        for (int i = -1; i <= 1; i++) {
-            if (x + i >= 0 && x + i < largeur) {
-                for (int j = -1; j <= 1; j++) {
-                    if (y + j >= 0 && y + j < hauteur) {
-                        if (listeEntite->entites[x+i][y+j][0] != NULL) {
-                            if (listeEntite->entites[x+i][y+j][0]->allegeance == AMI) {
-                                attaquerEntite(entite, listeEntite->entites[x+i][y+j][0]);
-                                attaque = true;
-                            }
+    // Si une unité alliée est à proximité de l'ennemi, on l'attaque
+    // On en attaque une à la fois
+    for (int i = -1; i <= 1; i++) {
+        if (x + i >= 0 && x + i < largeur) {
+            for (int j = -1; j <= 1; j++) {
+                if (y + j >= 0 && y + j < hauteur) {
+                    if (listeEntite->entites[x+i][y+j][0] != NULL) {
+                        if (listeEntite->entites[x+i][y+j][0]->allegeance == AMI) {
+                            attaquerEntite(entite, listeEntite->entites[x+i][y+j][0]);
+                            return;
                         }
                     }
                 }
             }
         }
+    }
+    
+    // Sinon on essaie de se déplacer
+    // On parcourt le chemin jusqu'à la fin
+    if (entite->element->caseSuivante != NULL) {
 
-        if (attaque) {
-            // continue;
-            return;
-        }
+        // attaque = false;
 
         // On récupère les coordonnées de la case suivante
-        int xSuivant = element->caseSuivante->coordonnees.x;
-        int ySuivant = element->caseSuivante->coordonnees.y;
+        int xSuivant = entite->element->caseSuivante->coordonnees.x;
+        int ySuivant = entite->element->caseSuivante->coordonnees.y;
 
         // On doit gérer le cas où la prochaine case est un mur cassable
         if (listeEntite->entites[xSuivant][ySuivant][1] != NULL) {
@@ -291,50 +298,44 @@ void uniteAmie(Entite *entite, ListeEntite *listeEntite, map *m, bool *exist) {
     int largeur = m->largeur / 2;
     int hauteur = m->hauteur / 2;
 
-    ElementChemin *element = entite->element;
+    // ElementChemin *element = entite->element;
 
-    bool attaque = false;
-    
-    // On parcourt le chemin jusqu'à la fin
-    if (element->caseSuivante->caseSuivante != NULL) {
+    printf("Test\n");
 
-        attaque = false;
+    // On récupère les coordonnées de l'entité
+    int x = entite->coordonnees.x;
+    int y = entite->coordonnees.y;
 
-        //Si l'entité est détruite on sort de la fonction
-        if (entite->pointsVie <= 0) {
-            detruireEntite(entite, listeEntite);
-            *exist = false;
-            return;
-        }
-        // On récupère les coordonnées de l'entité
-        int x = entite->coordonnees.x;
-        int y = entite->coordonnees.y;
+    //Si l'entité est détruite on sort de la fonction
+    if (entite->pointsVie <= 0) {
+        detruireEntite(entite, listeEntite);
+        *exist = false;
+        return;
+    }
 
-        // Si une unité alliée est à proximité de l'allié, on l'attaque
-        // On en attaque une à la fois
-        for (int i = -1; i <= 1; i++) {
-            if (x + i >= 0 && x + i < largeur) {
-                for (int j = -1; j <= 1; j++) {
-                    if (y + j >= 0 && y + j < hauteur) {
-                        if (listeEntite->entites[x+i][y+j][0] != NULL) {
-                            if (listeEntite->entites[x+i][y+j][0]->allegeance == ENNEMI) {
-                                attaquerEntite(entite, listeEntite->entites[x+i][y+j][0]);
-                                attaque = true;
-                            }
+    // Si une unité ennemie est à proximité de l'allié, on l'attaque
+    // On en attaque une à la fois
+    for (int i = -1; i <= 1; i++) {
+        if (x + i >= 0 && x + i < largeur) {
+            for (int j = -1; j <= 1; j++) {
+                if (y + j >= 0 && y + j < hauteur) {
+                    if (listeEntite->entites[x+i][y+j][0] != NULL) {
+                        if (listeEntite->entites[x+i][y+j][0]->allegeance == ENNEMI) {
+                            attaquerEntite(entite, listeEntite->entites[x+i][y+j][0]);
+                            return;
                         }
                     }
                 }
             }
         }
-
-        if (attaque) {
-            // continue;
-            return;
-        }
+    }
+    
+    // On parcourt le chemin jusqu'à la fin
+    if (entite->element->caseSuivante->caseSuivante != NULL) {
 
         // On récupère les coordonnées de la case suivante
-        int xSuivant = element->caseSuivante->coordonnees.x;
-        int ySuivant = element->caseSuivante->coordonnees.y;
+        int xSuivant = entite->element->caseSuivante->coordonnees.x;
+        int ySuivant = entite->element->caseSuivante->coordonnees.y;
 
         // SDL_Delay(1000);
         printf("xSuivant = %d / ySuivant = %d\n", xSuivant, ySuivant);
