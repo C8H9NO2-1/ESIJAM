@@ -76,11 +76,11 @@ void freeListeEntite(ListeEntite *listeEntite, map m) {
     free(listeEntite);
 }
 
-void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite) {
+void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite, texture_entite *texture) {
     // On initialise les variables qui ne dépendent pas du type d'entite avec lequel on travaille
     entite->coordonnees = coordonnees;
     entite->typeEntite = typeEntite;
-    entite->texture = (texture_entite *) malloc(sizeof(texture_entite));
+    entite->texture = texture;
     entite->element = (ElementCheminEnnemi *) malloc(sizeof(ElementCheminEnnemi));
 
     // Si l'entite est une unite
@@ -118,22 +118,20 @@ void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
     free(entite->element);
 }
 
-void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M){
-    printf("==1\n");
+void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M, camera *cam){
     for(int i = 0; i < M->largeur/2; i++){
-        printf("==2\n");
         for(int j = 0; j < M->hauteur/2; j++){
-            printf("==3\n");
             if(listeEntite->entites[i][j][0] != NULL)
-                afficherEntite(listeEntite->entites[i][j][0], renderer);
+                afficherEntite(listeEntite->entites[i][j][0], renderer, cam);
         }
     }
 
 }
 
-void afficherEntite(Entite *entite, SDL_Renderer *renderer) {
-    SDL_Rect rect = {entite->coordonnees.x * 64, entite->coordonnees.y * 64, TAILLE_TEXTURE_ENTITE-1, TAILLE_TEXTURE_ENTITE-1};
-
+void afficherEntite(Entite *entite, SDL_Renderer *renderer, camera *cam) {
+    SDL_Rect rect = {entite->coordonnees.x * 64 -(cam->x-(cam->w)/2)/cam->zoom, entite->coordonnees.y * 64 - ( cam->y-((cam->h)/2))/cam->zoom, TAILLE_TEXTURE_ENTITE-1, TAILLE_TEXTURE_ENTITE-1};
+    // rect.x = rect.x * cam->zoom;
+    // rect.y = rect.y * cam->zoom;
     switch (entite->typeEntite) {
     case UNITE:
         if (entite->allegeance == AMI) {

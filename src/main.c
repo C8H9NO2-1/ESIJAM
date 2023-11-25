@@ -32,10 +32,11 @@ int main(int argc, char *argv[]){
         switch (demarage)
         {
         case fenetre_menu_principal:
-            demarage = jeu(window, &para);
+            demarage = menuPrincipal(window, &para);
             break;
         case fenetre_parametre:
             //demarage = parametre(window, &para);
+            demarage = fenetre_sortir;
             break;
         case fenetre_jeu:
             demarage = jeu(window, &para);

@@ -48,7 +48,7 @@ void freeListeEntite(ListeEntite *listeEntite, map m);
  * @param coordonnees Coordonnées initiales de l'entité
  * @param listeEntite Pointeur vers la liste des entités
  */
-void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite);
+void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite, texture_entite *texture);
 
 /**
  * @brief Fonction qui permet de détruire une entité
@@ -65,7 +65,7 @@ void detruireEntite(Entite *entite, ListeEntite *listeEntite);
  * @param renderer Pointeur vers le renderer
  * @param tE Pointeur vers les textures des entités
  */
-void afficherEntite(Entite *entite, SDL_Renderer *renderer); //! Cette fonction devra être modifiée une fois que Tym aura fini les textures
+void afficherEntite(Entite *entite, SDL_Renderer *renderer, camera *cam); //! Cette fonction devra être modifiée une fois que Tym aura fini les textures
 
 /**
  * @brief Fonction qui permet le déplacement d'une entité
@@ -99,7 +99,7 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, CheminEnnemi
 /*
     Permet d'afficher les unitées présent dans la liste
 */
-void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M);
+void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M, camera *cam);
 
 //========== Fin Entité ==========
 

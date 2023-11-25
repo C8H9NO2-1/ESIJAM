@@ -9,16 +9,49 @@
 #include "header/graphe.h"
 #include "header/ui.h"
 
-int menuPrincipal(SDL_Window *window, parametre *para){
+struct argMenuPrinc{
+    fenetre *sortie;
+    bool *running;
+};
+typedef struct argMenuPrinc argMenuPrinc;
+
+void boutonNouvellePartie(void* data){
+    argMenuPrinc *arg = (argMenuPrinc*) data;
+    *(arg->running) = false;
+    *(arg->sortie) = fenetre_jeu;
+}
+void boutonChargerPartie(void* data){
+    argMenuPrinc *arg = (argMenuPrinc*) data;
+    *(arg->running) = false;
+    *(arg->sortie) = fenetre_jeu;
+}
+void boutonParametre(void* data){
+    argMenuPrinc *arg = (argMenuPrinc*) data;
+    *(arg->running) = false;
+    *(arg->sortie) = fenetre_parametre;
+}
+void boutonCredits(void* data){
+    argMenuPrinc *arg = (argMenuPrinc*) data;
+    *(arg->running) = false;
+    *(arg->sortie) = fenetre_credit;
+}
+
+fenetre menuPrincipal(SDL_Window *window, parametre *para){
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool running = true;
+    fenetre sortie = fenetre_sortir;
  
+    argMenuPrinc arg = {&sortie, &running};
+
     ui_liste *l = initList_ui();
     TTF_Font *font = TTF_OpenFont("data/fonts/roboto.ttf", 2000);
-    initLabel_ui(l, 500, 200, 300, 150, "Poulpy's", renderer, font);
+    initLabel_ui(l, para->coefResolution*LARGEUR/4, 0, para->coefResolution*LARGEUR/2, para->coefResolution*HAUTEUR*3/11, "Poulpy's last stand", renderer, font);
     TTF_CloseFont(font);
-    font = TTF_OpenFont("data/fonts/roboto.ttf", 2000);
-    initBouton_ui(l, 100, 100, 200, 100, "Option", NULL, NULL, renderer, font);
+    font = TTF_OpenFont("data/fonts/roboto.ttf", 200);
+    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/3, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "NOUVELLE PARTIE", boutonNouvellePartie, &arg, renderer, font);
+    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/2, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "CHARGER PARTIE", boutonChargerPartie, &arg, renderer, font);
+    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*8/12, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "OPTIONS", boutonParametre, &arg, renderer, font);
+    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*10/12, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "CREDITS", boutonCredits, &arg, renderer, font);
     TTF_CloseFont(font);
     SDL_Event e;
 
@@ -39,6 +72,15 @@ int menuPrincipal(SDL_Window *window, parametre *para){
                 case SDL_QUIT:
                     running = false;
                     break;
+                case SDL_KEYDOWN:
+                    switch(e.key.keysym.sym){
+                        case SDLK_ESCAPE:
+                            running = false;
+                            break;                        
+                        default :
+                            break;
+                    }
+                    break;
                 default :
                     break;
             }
@@ -46,10 +88,9 @@ int menuPrincipal(SDL_Window *window, parametre *para){
         }
         while(SDL_GetTicks64() - frame_start < 1000 / (Uint64)para->FPS)
             SDL_Delay(1 /* ms */);
-        
     }
 
     SDL_DestroyRenderer(renderer);
     
-    return 0;
+    return sortie;
 }
