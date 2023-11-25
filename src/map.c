@@ -93,9 +93,7 @@ void afficheMapCamera(camera* cam, map *m, SDL_Renderer *renderer, texture_map *
         rect.x = xp;
         rect.y += TAILLE_TEXTURE_MAP;
     }
-    printf("==0\n");
-    afficherListeEntite(lE, renderer, m);
-    printf("==99\n");
+    afficherListeEntite(lE, renderer, m, cam);
 
     SDL_SetRenderTarget(renderer, NULL);
     SDL_Rect dest_rect = { 0, 0, (w-x+(5/cam->zoom))*TAILLE_TEXTURE_MAP*(cam->zoom), (h-y+(5/cam->zoom))*TAILLE_TEXTURE_MAP*(cam->zoom) };
@@ -409,8 +407,8 @@ map* lecturePseudoMap(const char* nom_fichier, texture_map* tM, int seed){
 }
 
 float zoomMinDetermination(map *M, parametre* para){
-    float r1 = ((float) para->coefResolution*LARGEUR)/((float) M->largeur*TAILLE_TEXTURE_MAP);
-    float r2 = ((float) para->coefResolution*HAUTEUR)/((float) M->hauteur*TAILLE_TEXTURE_MAP);
+    float r1 = ((float) (para->coefResolution*LARGEUR/*-20*/))/((float) M->largeur*TAILLE_TEXTURE_MAP);
+    float r2 = ((float) (para->coefResolution*HAUTEUR/*-20*/))/((float) M->hauteur*TAILLE_TEXTURE_MAP);
     if(r1 < r2) return r2;
     return r1;
 }

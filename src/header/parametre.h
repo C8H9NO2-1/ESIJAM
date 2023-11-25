@@ -9,7 +9,7 @@
 #define HAUTEUR 9
 
 //Demarrage sur le menu principal
-#define START fenetre_jeu;
+#define START fenetre_menu_principal;
 
 struct parametre{
     int coefResolution;
@@ -19,7 +19,7 @@ struct parametre{
 typedef struct parametre parametre;
 
 enum fenetre{
-    fenetre_sortir, fenetre_menu_principal, fenetre_parametre, fenetre_jeu
+    fenetre_sortir, fenetre_menu_principal, fenetre_parametre, fenetre_jeu, fenetre_nouvelle_partie, fenetre_credit
 };
 typedef enum fenetre fenetre;
 
