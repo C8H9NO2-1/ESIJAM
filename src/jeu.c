@@ -573,5 +573,5 @@ int jeu(SDL_Window *window, parametre *para){
     freeMap(M);
     freeTextureMap(tM);
     SDL_DestroyRenderer(renderer);
-    return 0;
+    return fenetre_parametre;
 }

@@ -2,6 +2,7 @@
 
 #include "header/parametre.h"
 #include "header/fenetre_menu_principal.h"
+#include "header/defaite.h"
 #include "header/jeu.h"
  
 /*
@@ -35,7 +36,7 @@ int main(int argc, char *argv[]){
             demarage = menuPrincipal(window, &para);
             break;
         case fenetre_parametre:
-            //demarage = parametre(window, &para);
+            demarage = menuDefaite(window, &para);
             demarage = fenetre_sortir;
             break;
         case fenetre_jeu:
