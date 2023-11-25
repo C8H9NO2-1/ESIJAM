@@ -48,10 +48,8 @@ fenetre menuPrincipal(SDL_Window *window, parametre *para){
     initLabel_ui(l, para->coefResolution*LARGEUR/4, 0, para->coefResolution*LARGEUR/2, para->coefResolution*HAUTEUR*3/11, "Poulpy's last stand", renderer, font);
     TTF_CloseFont(font);
     font = TTF_OpenFont("data/fonts/roboto.ttf", 200);
-    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/3, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "NOUVELLE PARTIE", boutonNouvellePartie, &arg, renderer, font);
-    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/2, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "CHARGER PARTIE", boutonChargerPartie, &arg, renderer, font);
-    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*8/12, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "OPTIONS", boutonParametre, &arg, renderer, font);
-    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*10/12, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "CREDITS", boutonCredits, &arg, renderer, font);
+    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/3, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "DEMARRER", boutonNouvellePartie, &arg, renderer, font);
+    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/2, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "Quitter", boutonCredits, &arg, renderer, font);
     TTF_CloseFont(font);
     SDL_Event e;
 
