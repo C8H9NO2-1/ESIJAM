@@ -194,7 +194,6 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, bool *defeat
     // ElementCheminEnnemi *element = chemin->premier;
 
     bool attaque = false;
-    printf("Test\n");
     
     // On parcourt le chemin jusqu'à la fin
     if (element->caseSuivante != NULL) {

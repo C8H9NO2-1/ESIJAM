@@ -30,7 +30,7 @@ struct argUniteEnnemie {
     map *m;
     bool *fin;
     bool *defeat;
-    bool *exist;
+    int *nbEnnemiRestant;
 };
 typedef struct argUniteEnnemie argUniteEnnemie;
 
@@ -41,7 +41,6 @@ struct argUniteAllie {
     map *m;
     bool *fin;
     bool *defeat;
-    bool *exist;
 };
 typedef struct argUniteAllie argUniteAllie;
 //Fonction qui est executer dans un autre thread que le principal et qui permet d'afficher selon des FPS
@@ -87,17 +86,19 @@ void *ennemi(void *data) {
     map *m = arg->m;
     bool *fin = arg->fin;
     bool *defeat = arg->defeat;
-    bool *exist = arg->exist;
+    bool exist = true;
+    int *nbEnnemiR = arg->nbEnnemiRestant;
 
-    while (*running && !(*defeat) && *exist) {
+    while (*running && !(*defeat) && exist) {
         Uint64 frame_start = SDL_GetTicks64();
 
-        uniteEnnemie(entite, listeEntite, m, defeat, exist);
+        uniteEnnemie(entite, listeEntite, m, defeat, &exist);
 
         while(SDL_GetTicks64() - frame_start < 1000 / 5)
             SDL_Delay(1);
     }
 
+    free(entite);
     *fin = true;
     return NULL;
 }
@@ -110,17 +111,18 @@ void *ami(void *data) {
     map *m = arg->m;
     bool *fin = arg->fin;
     bool *defeat = arg->defeat;
-    bool *exist = arg->exist;
+    bool exist = true;
 
-    while (*running && !(*defeat) && *exist) {
+    while (*running && !(*defeat) && exist) {
         Uint64 frame_start = SDL_GetTicks64();
 
-        uniteAmie(entite, listeEntite, m, exist);
+        uniteAmie(entite, listeEntite, m, &exist);
 
         while(SDL_GetTicks64() - frame_start < 1000 / 5)
             SDL_Delay(1);
     }
 
+    free(entite);
     *fin = true;
     return NULL;
 }
@@ -134,6 +136,7 @@ struct argPhase{
     bool *periodePause;
     int *nombreDEnnemieRestant;
     bool* running;
+    int *PV_poulpy;
 };
 typedef struct argPhase argPhase;
 
@@ -146,6 +149,7 @@ void phase(void *data){
     bool *periodePause = argu->periodePause;
     int *nombreDEnnemieRestant = argu->nombreDEnnemieRestant;
     bool *running = argu->running;
+    int *PV_poulpy = argu->PV_poulpy;
     while(*running){
         if(*periodePause){
             SDL_Delay((*dureeEntreChaqueVague)*60*1000);
@@ -155,8 +159,12 @@ void phase(void *data){
             (*numeroDeVague)++;
         }
         else{
-            while(*nombreDEnnemieRestant > 0){
+            while(*nombreDEnnemieRestant > 0 && *PV_poulpy > 0){
                 SDL_Delay(2);
+            }
+            *periodePause = true;
+            if(*PV_poulpy <= 0){
+                *running = false;
             }
         }
     }
@@ -224,21 +232,19 @@ int jeu(SDL_Window *window, parametre *para){
 
     bool defeat = false;
     bool finEntite = false;
-    bool existEntite1 = true;
-    argUniteEnnemie arguments = {&running, entite, listeEntite, M, &finEntite, &defeat, &existEntite1};
+    argUniteEnnemie arguments = {&running, entite, listeEntite, M, &finEntite, &defeat, &nombreDEnnemieRestant};
     pthread_t threadEnnemi1;
     pthread_create(&threadEnnemi1, NULL, ennemi, &arguments);
 
 
     bool finEntite2 = false;
-    bool existEntite2 = true;
-    argUniteEnnemie arguments2 = {&running, entite2, listeEntite, M, &finEntite2, &defeat, &existEntite2};
+    argUniteEnnemie arguments2 = {&running, entite2, listeEntite, M, &finEntite2, &defeat, &nombreDEnnemieRestant};
     pthread_t threadEnnemi2;
     pthread_create(&threadEnnemi2, NULL, ennemi, &arguments2);
 
     bool finEntite3 = false;
     bool existEntite3 = true;
-    argUniteAllie arguments3 = {&running, entite3, listeEntite, M, &finEntite3, &defeat, &existEntite3};
+    argUniteAllie arguments3 = {&running, entite3, listeEntite, M, &finEntite3, &defeat};
     pthread_t threadAllie1;
     // pthread_create(&threadAllie1, NULL, ami, &arguments3);
 
@@ -271,8 +277,8 @@ int jeu(SDL_Window *window, parametre *para){
                     }
                     break;
             
-            default:
-            break;
+                default:
+                break;
             }
             eventListe_ui(l, &e);
         }
@@ -299,8 +305,8 @@ int jeu(SDL_Window *window, parametre *para){
                     }
                     break;
             
-            default:
-            break;
+                default:
+                break;
             }
             eventListe_ui(l, &e);
         }
