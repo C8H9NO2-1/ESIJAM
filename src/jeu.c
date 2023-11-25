@@ -91,17 +91,39 @@ void *unite(void *data) {
 
 
 struct argPhase{
-    int numeroDeVague;
-    float dureeEntreChaqueVague;//En minute
-    int nombreDEnnemie;
-    float tauxDEnnemisEntreVague;
-    bool periodePause;
-    int nombreDEnnemieRestant;
+    int *numeroDeVague;
+    float *dureeEntreChaqueVague;//En minute
+    int *nombreDEnnemie;
+    float *tauxDEnnemisEntreVague;
+    bool *periodePause;
+    int *nombreDEnnemieRestant;
+    bool* running;
 };
 typedef struct argPhase argPhase;
 
 void phase(void *data){
     argPhase *argu = data;
+    int *numeroDeVague = argu->numeroDeVague;
+    float *dureeEntreChaqueVague = argu->dureeEntreChaqueVague;
+    int *nombreDEnnemie = argu->nombreDEnnemie;
+    float *tauxDEnnemisEntreVague = argu->tauxDEnnemisEntreVague;
+    bool *periodePause = argu->periodePause;
+    int *nombreDEnnemieRestant = argu->nombreDEnnemieRestant;
+    bool *running = argu->running;
+    while(*running){
+        if(*periodePause){
+            SDL_Delay((*dureeEntreChaqueVague)*60*1000);
+            *nombreDEnnemie *= (*tauxDEnnemisEntreVague);
+            *nombreDEnnemieRestant = *nombreDEnnemie;
+            *periodePause = false; 
+            (*numeroDeVague)++;
+        }
+        else{
+            while(*nombreDEnnemieRestant > 0){
+                SDL_Delay(2);
+            }
+        }
+    }
 }
 
 int jeu(SDL_Window *window, parametre *para){
