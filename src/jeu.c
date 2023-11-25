@@ -307,11 +307,11 @@ int jeu(SDL_Window *window, parametre *para){
     Entite *nexus = malloc(sizeof(Entite));
 
     ListeEntite *listeEntite = initialiserListeEntite(*M);
-    texture_entite *tE;
-    chargerTextureEntite(&tE, "data/texture/sprite.png", "data/texture/sprite3.png", renderer);
+    texture_entite *tE_ennemi;
+    chargerTextureEntite(&tE_ennemi, "data/texture/sprite2.png", "data/texture/sprite2.png", renderer);
 
-    texture_entite *tE2;
-    chargerTextureEntite(&tE2, "data/texture/sprite2.png", "data/texture/sprite2.png", renderer);
+    texture_entite *tE_allie;
+    chargerTextureEntite(&tE_allie, "data/texture/sprite.png", "data/texture/sprite3.png", renderer);
 
     texture_entite *textureNexus;
     chargerTextureEntite(&textureNexus, "data/texture/betaNexus.png", "data/texture/sprite2.png", renderer);
@@ -357,7 +357,7 @@ int jeu(SDL_Window *window, parametre *para){
     arg_ajoutEnnemi.nombreEnnemiRestant = &nombreDEnnemieRestant;
     arg_ajoutEnnemi.periodePause = &periodePause;
     arg_ajoutEnnemi.running = &running;
-    arg_ajoutEnnemi.tE = tE;
+    arg_ajoutEnnemi.tE = tE_ennemi;
     pthread_t threadAjoutEnnemi;
     pthread_create(&threadAjoutEnnemi, NULL, ajoutEnnemi, &arg_ajoutEnnemi);
     //Execution du thread pour la video
@@ -437,7 +437,7 @@ int jeu(SDL_Window *window, parametre *para){
         }
     }
     //Attente de fin d'execution du second thread
-    supprimeListeFin(liste_fin);
+    // supprimeListeFin(liste_fin);
     
 
     freeListe_ui(l);
