@@ -8,6 +8,7 @@
 #include "header/texture_entites.h"
 #include "header/graphe.h"
 #include "header/ui.h"
+#include "header/finThread.h"
  
 //Argument pour le second thread
 struct argAfficheVideo{
@@ -30,7 +31,7 @@ struct argUniteEnnemie {
     map *m;
     bool *fin;
     bool *defeat;
-    bool *exist;
+    int *nbEnnemiRestant;
 };
 typedef struct argUniteEnnemie argUniteEnnemie;
 
@@ -41,7 +42,6 @@ struct argUniteAllie {
     map *m;
     bool *fin;
     bool *defeat;
-    bool *exist;
     Graphe *graphe;
 };
 typedef struct argUniteAllie argUniteAllie;
@@ -88,17 +88,19 @@ void *ennemi(void *data) {
     map *m = arg->m;
     bool *fin = arg->fin;
     bool *defeat = arg->defeat;
-    bool *exist = arg->exist;
+    bool exist = true;
+    int *nbEnnemiR = arg->nbEnnemiRestant;
 
-    while (*running && !(*defeat) && *exist) {
+    while (*running && !(*defeat) && exist) {
         Uint64 frame_start = SDL_GetTicks64();
 
-        uniteEnnemie(entite, listeEntite, m, defeat, exist);
+        uniteEnnemie(entite, listeEntite, m, defeat, &exist);
 
         while(SDL_GetTicks64() - frame_start < 1000 / 5)
             SDL_Delay(1);
     }
 
+    free(entite);
     *fin = true;
     return NULL;
 }
@@ -111,10 +113,11 @@ void *ami(void *data) {
     map *m = arg->m;
     bool *fin = arg->fin;
     bool *defeat = arg->defeat;
-    bool *exist = arg->exist;
     Graphe *graphe = arg->graphe;
 
-    while (*running && !(*defeat) && *exist) {
+    bool exist = true;
+
+    while (*running && !(*defeat) && exist) {
         Uint64 frame_start = SDL_GetTicks64();
 
         if (entite->nouvelObjectif) {
@@ -122,40 +125,152 @@ void *ami(void *data) {
             entite->nouvelObjectif = false;
         }
 
-        uniteAmie(entite, listeEntite, m, exist);
+        uniteAmie(entite, listeEntite, m, &exist);
 
         while(SDL_GetTicks64() - frame_start < 1000 / 5)
             SDL_Delay(1);
     }
 
+    free(entite);
     *fin = true;
     return NULL;
 }
 
 
 struct argPhase{
-    int numeroDeVague;
-    float dureeEntreChaqueVague;//En minute
-    int nombreDEnnemie;
-    float tauxDEnnemisEntreVague;
-    bool periodePause;
-    int nombreDEnnemieRestant;
+    int *numeroDeVague;
+    float *dureeEntreChaqueVague;//En minute
+    int *nombreDEnnemie;
+    float *tauxDEnnemisEntreVague;
+    bool *periodePause;
+    int *nombreDEnnemieRestant;
+    bool* running;
+    int *PV_poulpy;
+    bool *fin;
 };
 typedef struct argPhase argPhase;
 
-void phase(void *data){
-    argPhase *argu = data;
+void *phase(void *data){
+    argPhase *argu = (argPhase*) data;
+    int *numeroDeVague = argu->numeroDeVague;
+    float *dureeEntreChaqueVague = argu->dureeEntreChaqueVague;
+    int *nombreDEnnemie = argu->nombreDEnnemie;
+    float *tauxDEnnemisEntreVague = argu->tauxDEnnemisEntreVague;
+    bool *periodePause = argu->periodePause;
+    int *nombreDEnnemieRestant = argu->nombreDEnnemieRestant;
+    bool *running = argu->running;
+    int *PV_poulpy = argu->PV_poulpy;
+    bool *fin = argu->fin;
+    while(*running){
+        if(*periodePause){
+            *nombreDEnnemie *= (*tauxDEnnemisEntreVague);
+            SDL_Delay((*dureeEntreChaqueVague)*60*1000);
+            *nombreDEnnemieRestant = *nombreDEnnemie;
+            *periodePause = false; 
+            (*numeroDeVague)++;
+        }
+        else{
+            if(((*nombreDEnnemieRestant) < 0) || (*PV_poulpy < 0)){
+                *periodePause = true;
+                if(*PV_poulpy <= 0){
+                    *running = false;
+                }
+            }
+            SDL_Delay(2);
+        }
+    }
+    *fin = true;
+    return NULL;
+}
+
+struct argAjoutEnnemi{
+    bool *running;
+    bool *fin;
+    bool *periodePause;
+    int *nombreEnnemi;
+    int *nombreEnnemiRestant;
+    ListeEntite *listeEntite;
+    texture_entite *tE;
+    bool *defeat;
+    map *M;
+    listeFin *liste_fin;
+    ListeCheminsEnnemis *listeCheminsEnnemis;
+};
+typedef struct argAjoutEnnemi argAjoutEnnemi;
+
+void *ajoutEnnemi(void *data){
+    argAjoutEnnemi *arg = (argAjoutEnnemi*) data;
+    bool *running = arg->running;
+    bool *fin = arg->fin;
+    bool *periodePause = arg->periodePause;
+    ListeEntite *listeEntite = arg->listeEntite;
+    texture_entite *tE = arg->tE;
+    map* M = arg->M;
+    int *nombreEnnemie = arg->nombreEnnemi;
+    int *nombreEnnemieRestant = arg->nombreEnnemiRestant;
+    bool *defeat = arg->defeat;
+    listeFin *liste_fin = arg->liste_fin;
+    ListeCheminsEnnemis *listeCheminsEnnemis = arg->listeCheminsEnnemis;
+
+    int nbUniteAFaireApparaitre = 0;
+
+    while(*running){
+        Uint64 frame_start = SDL_GetTicks64();
+        if(*periodePause){
+            nbUniteAFaireApparaitre = *nombreEnnemie;
+            SDL_Delay(50);
+        }
+        else if(nbUniteAFaireApparaitre > 0){
+            Entite *entite = malloc(sizeof(Entite));
+            bool *finEntite = malloc(sizeof(bool));
+            *finEntite = false;
+            ajouteListeFin(liste_fin, finEntite);
+            argUniteEnnemie arguments = {running, entite, listeEntite, M, finEntite, defeat, nombreEnnemieRestant};
+            pthread_t threadEnnemi;
+            switch(frame_start%4){
+                case 0 :
+                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 0}, listeEntite, tE);
+                    entite->element = listeCheminsEnnemis->chemin1->premier;
+                    pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
+                    break;
+                case 1:
+                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {24, M->hauteur / 4}, listeEntite, tE);
+                    entite->element = listeCheminsEnnemis->chemin2->premier;
+                    pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
+                    break;
+                case 2:
+                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 24}, listeEntite, tE);
+                    entite->element = listeCheminsEnnemis->chemin3->premier;
+                    pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
+                    break;
+                case 3:
+                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {0, M->hauteur / 4}, listeEntite, tE);
+                    entite->element = listeCheminsEnnemis->chemin4->premier;
+                    pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
+                    break;
+
+            }
+            nbUniteAFaireApparaitre--;
+            SDL_Delay(5000);
+        }
+        else{
+            SDL_Delay(5);
+        }
+    }
+    *fin = true;
+    return NULL;
 }
 
 int jeu(SDL_Window *window, parametre *para){
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool running = true;
-    bool fin = false;
+    listeFin liste_fin = initListeFin();
     texture_map* tM;
     tM = chargeTextureMap("data/texture/murSolPlafond.png", renderer);
 
     map *M;
     M = lecturePseudoMap("data/map/pseudoMap1.pm", tM, 586);
+    bool defeat = false;
 
     //!========================== Dégats ============================
     int degatUnite = 4;
@@ -169,12 +284,12 @@ int jeu(SDL_Window *window, parametre *para){
     //!========================== Fin système de monnaie ============
     //!=========================== Système de Vague =================
     int numeroDeVague =1;
-    float dureeEntreChaqueVague = 2.;//En minute
+    float dureeEntreChaqueVague = 35./60.;//En minute
     int nombreDEnnemie = 5;
     float tauxDEnnemisEntreVague = 1.2;
     bool periodePause = true;
 
-    int nombreDEnnemieRestant = 0;
+    int nombreDEnnemieRestant = 5;
 
     //!========================== Fin système de Vague ================
     //----------------------------------------Teste UI----------------
@@ -191,9 +306,6 @@ int jeu(SDL_Window *window, parametre *para){
 
     Entite *nexus = malloc(sizeof(Entite));
 
-    Entite *entite = malloc(sizeof(Entite));
-    Entite *entite2 = malloc(sizeof(Entite));
-    Entite *entite3 = malloc(sizeof(Entite));
     ListeEntite *listeEntite = initialiserListeEntite(*M);
     texture_entite *tE;
     chargerTextureEntite(&tE, "data/texture/sprite.png", "data/texture/sprite3.png", renderer);
@@ -205,11 +317,6 @@ int jeu(SDL_Window *window, parametre *para){
     chargerTextureEntite(&textureNexus, "data/texture/betaNexus.png", "data/texture/sprite2.png", renderer);
 
     initialiserEntite(nexus, AMI, UNITE, (Coordonnees) {M->largeur / 4, M->hauteur / 4}, listeEntite, textureNexus);
-    nexus->element->caseSuivante = NULL;
-
-    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 0}, listeEntite, tE2);
-    initialiserEntite(entite2, ENNEMI, UNITE, (Coordonnees) {M->largeur / 2 - 1, M->hauteur / 4}, listeEntite, tE2);
-    initialiserEntite(entite3, AMI, UNITE, (Coordonnees) {M->largeur / 4 + 3, M->hauteur / 4}, listeEntite, tE);
 
     // On met les points de vie du nexus très haut pour les tests
     listeEntite->entites[M->largeur / 4][M->hauteur / 4][0]->pointsVie = 1000000;
@@ -217,42 +324,47 @@ int jeu(SDL_Window *window, parametre *para){
     Graphe graphe = matriceAdjacences(*M, listeEntite);
 
     ListeCheminsEnnemis *listeCheminsEnnemis = calculeCheminsEnnemis(graphe, *M);
-    entite->element = listeCheminsEnnemis->chemin1->premier;
-    entite2->element = listeCheminsEnnemis->chemin2->premier;
 
     //!========== Fin du Test ==========
-
-    bool defeat = false;
-    bool finEntite = false;
-    bool existEntite1 = true;
-    argUniteEnnemie arguments = {&running, entite, listeEntite, M, &finEntite, &defeat, &existEntite1};
-    pthread_t threadEnnemi1;
-    pthread_create(&threadEnnemi1, NULL, ennemi, &arguments);
-
-
-    bool finEntite2 = false;
-    bool existEntite2 = true;
-    argUniteEnnemie arguments2 = {&running, entite2, listeEntite, M, &finEntite2, &defeat, &existEntite2};
-    pthread_t threadEnnemi2;
-    pthread_create(&threadEnnemi2, NULL, ennemi, &arguments2);
-
-    bool finEntite3 = false;
-    bool existEntite3 = true;
-    Coordonnees destination = {M->largeur / 4, 1};
-    argUniteAllie arguments3 = {&running, entite3, listeEntite, M, &finEntite3, &defeat, &existEntite3, &graphe};
-    pthread_t threadAllie1;
-    pthread_create(&threadAllie1, NULL, ami, &arguments3);
-
-    bool finEntite4 = false;
-    bool existEntite4 = true;
-    argUniteAllie arguments4 = {&running, nexus, listeEntite, M, &finEntite4, &defeat, &existEntite4, NULL};
-    pthread_t threadAllie2;
-    pthread_create(&threadAllie2, NULL, ami, &arguments4);
-
     float zoomMin = zoomMinDetermination(M, para);
-    //Execution du second thread pour la video
+
+    //Execution du thread pour les phases
+    argPhase arg_phase;
+    arg_phase.fin = malloc(sizeof(bool));
+    *(arg_phase.fin) = false;
+    ajouteListeFin(&liste_fin, arg_phase.fin);
+    arg_phase.dureeEntreChaqueVague = &dureeEntreChaqueVague;
+    arg_phase.nombreDEnnemie = &nombreDEnnemie;
+    arg_phase.nombreDEnnemieRestant = &nombreDEnnemieRestant;
+    arg_phase.numeroDeVague = &numeroDeVague;
+    arg_phase.periodePause = &periodePause;
+    arg_phase.PV_poulpy = &(listeEntite->entites[M->largeur / 4][M->hauteur / 4][0]->pointsVie);
+    arg_phase.running = &running;
+    arg_phase.tauxDEnnemisEntreVague = &tauxDEnnemisEntreVague;
+    pthread_t threadPhase;
+    pthread_create(&threadPhase, NULL, phase, &arg_phase);
+    //Execution du thread pour l'ajout d'ennemi
+    argAjoutEnnemi arg_ajoutEnnemi;
+    arg_ajoutEnnemi.fin = malloc(sizeof(bool));
+    *(arg_ajoutEnnemi.fin) = false;
+    ajouteListeFin(&liste_fin, arg_ajoutEnnemi.fin);
+    arg_ajoutEnnemi.defeat = &defeat;
+    arg_ajoutEnnemi.liste_fin = &liste_fin;
+    arg_ajoutEnnemi.listeCheminsEnnemis = listeCheminsEnnemis;
+    arg_ajoutEnnemi.listeEntite = listeEntite;
+    arg_ajoutEnnemi.M = M;
+    arg_ajoutEnnemi.nombreEnnemi = &nombreDEnnemie;
+    arg_ajoutEnnemi.nombreEnnemiRestant = &nombreDEnnemieRestant;
+    arg_ajoutEnnemi.periodePause = &periodePause;
+    arg_ajoutEnnemi.running = &running;
+    arg_ajoutEnnemi.tE = tE;
+    pthread_t threadAjoutEnnemi;
+    pthread_create(&threadAjoutEnnemi, NULL, ajoutEnnemi, &arg_ajoutEnnemi);
+    //Execution du thread pour la video
+    bool *finAffichageVideo = malloc(sizeof(bool));
+    ajouteListeFin(&liste_fin, finAffichageVideo);
     camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, zoomMin, LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
-    argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, &fin, l, listeEntite};
+    argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, finAffichageVideo, l, listeEntite};
     pthread_t threadVideo;
     pthread_create(&threadVideo, NULL, afficheVideo, &arg);
   
@@ -280,8 +392,8 @@ int jeu(SDL_Window *window, parametre *para){
                     }
                     break;
             
-            default:
-            break;
+                default:
+                break;
             }
             eventListe_ui(l, &e);
         }
@@ -325,10 +437,7 @@ int jeu(SDL_Window *window, parametre *para){
         }
     }
     //Attente de fin d'execution du second thread
-    while(!fin) SDL_Delay(50);
-    // while(!finEntite) SDL_Delay(50);
-    // while(!finEntite2) SDL_Delay(50);
-    // while(!finEntite3) SDL_Delay(50);
+    supprimeListeFin(liste_fin);
     
 
     freeListe_ui(l);

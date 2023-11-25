@@ -101,6 +101,13 @@ struct Graphe {
     int** matriceAdjacenceAllie;
 };
 
+//=========Liste Fin Thread=======
+typedef struct mailleFin mailleFin;
+typedef mailleFin* listeFin;
+struct mailleFin{
+    bool* valeur;
+    listeFin next;
+};
 
 
 #endif
