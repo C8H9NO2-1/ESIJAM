@@ -33,6 +33,8 @@ struct argUniteEnnemie {
     bool *defeat;
     int *nbEnnemiRestant;
     bool *exist;
+
+    int *points;
 };
 typedef struct argUniteEnnemie argUniteEnnemie;
 
@@ -80,8 +82,8 @@ void *ennemi(void *data) {
     bool *fin = arg->fin;
     bool *defeat = arg->defeat;
     bool *exist = arg->exist;
-    // bool exist = true;
     int *nbEnnemiR = arg->nbEnnemiRestant;
+    int *points = arg->points;
 
     while (*running && !(*defeat) && *exist) {
         Uint64 frame_start = SDL_GetTicks64();
@@ -91,6 +93,9 @@ void *ennemi(void *data) {
         while(SDL_GetTicks64() - frame_start < 1000 / 5)
             SDL_Delay(1);
     }
+
+    *points += 3;
+    *nbEnnemiR -= 1;
 
     *fin = true;
     return NULL;
@@ -187,6 +192,8 @@ struct argAjoutEnnemi{
     map *M;
     listeFin *liste_fin;
     ListeCheminsEnnemis *listeCheminsEnnemis;
+
+    int *points;
 };
 typedef struct argAjoutEnnemi argAjoutEnnemi;
 
@@ -203,6 +210,8 @@ void *ajoutEnnemi(void *data){
     bool *defeat = arg->defeat;
     listeFin *liste_fin = arg->liste_fin;
     ListeCheminsEnnemis *listeCheminsEnnemis = arg->listeCheminsEnnemis;
+
+    int *points = arg->points;
 
     int nbUniteAFaireApparaitre = 0;
 
@@ -221,7 +230,7 @@ void *ajoutEnnemi(void *data){
             *finEntite = false;
             ajouteListeFin(liste_fin, finEntite);
             existEnnemi[indiceEnnemi] = true;
-            argUniteEnnemie arguments = {running, entite, listeEntite, M, finEntite, defeat, nombreEnnemieRestant, &existEnnemi[indiceEnnemi]};
+            argUniteEnnemie arguments = {running, entite, listeEntite, M, finEntite, defeat, nombreEnnemieRestant, &existEnnemi[indiceEnnemi], points};
             indiceEnnemi++;
             pthread_t threadEnnemi;
             switch(frame_start%4){
@@ -282,6 +291,7 @@ int jeu(SDL_Window *window, parametre *para){
     //!=========================== Système de Vague =================
     int numeroDeVague =1;
     float dureeEntreChaqueVague = 35./60.;//En minute
+    // float dureeEntreChaqueVague = 60./60.;//En minute
     // float dureeEntreChaqueVague = 1./60.;//En minute
     int nombreDEnnemie = 5;
     float tauxDEnnemisEntreVague = 1.2;
@@ -299,11 +309,16 @@ int jeu(SDL_Window *window, parametre *para){
 
     //!========== Pour les unités alliées et les pièges ==========
     int indiceUniteAllie = 0;
-    // int indicePiege = 0;
     argUniteAllie argumentsAllies[1000];
     Entite *unitesAllie[1000];
     pthread_t threadAllie[1000];
     bool existAllie[1000];
+
+    int indicePiege = 0;
+    argUniteAllie argumentsPiege[1000];
+    Entite *pieges[1000];
+    pthread_t threadPiege[1000];
+    bool existPiege[1000];
 
     //!========== Fin des unités alliées et les pièges ==========
 
@@ -320,6 +335,12 @@ int jeu(SDL_Window *window, parametre *para){
 
     texture_entite *textureNexus;
     chargerTextureEntite(&textureNexus, "data/texture/betaNexus.png", "data/texture/sprite2.png", renderer);
+
+    texture_entite *texturePiege1;
+    chargerTexturePiege1(&texturePiege1, "data/texture/piege1.png", renderer);
+
+    texture_entite *texturePiege2;
+    chargerTexturePiege2(&texturePiege2, "data/texture/piege2.png", renderer);
 
     initialiserEntite(nexus, AMI, UNITE, (Coordonnees) {M->largeur / 4, M->hauteur / 4}, listeEntite, textureNexus, true);
     bool existNexus = true;
@@ -393,6 +414,7 @@ int jeu(SDL_Window *window, parametre *para){
     arg_ajoutEnnemi.periodePause = &periodePause;
     arg_ajoutEnnemi.running = &running;
     arg_ajoutEnnemi.tE = tE_ennemi;
+    arg_ajoutEnnemi.points = &point;
     pthread_t threadAjoutEnnemi;
     pthread_create(&threadAjoutEnnemi, NULL, ajoutEnnemi, &arg_ajoutEnnemi);
     //Execution du thread pour la video
@@ -409,6 +431,8 @@ int jeu(SDL_Window *window, parametre *para){
     // !========== Fin Attention ======
 
     SDL_Event e;
+    SDL_Event e2;
+    bool editionPiege = false;
     while(running){
         if(periodePause){
             SDL_WaitEvent(&e);
@@ -421,12 +445,73 @@ int jeu(SDL_Window *window, parametre *para){
                         case SDLK_ESCAPE:
                             running = false;
                             break;
+                        case SDLK_p:
+                            editionPiege = true;
+                            while (editionPiege && periodePause) {
+                                SDL_PollEvent(&e2);
+                                switch (e2.type){
+                                    case SDL_KEYDOWN:
+                                        switch (e2.key.keysym.sym){
+                                            case SDLK_p:
+                                                editionPiege = false;
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                        break;
+                                    case SDL_MOUSEBUTTONDOWN:
+                                        switch (e2.button.button) {
+                                            case SDL_BUTTON_LEFT:
+                                                if (point >= coutPiege) {
+                                                    printf("Nouveau piege\n");
+                                                    if (posePiege1(listeEntite, M, pieges, indicePiege, texturePiege1, (Coordonnees) {e2.button.x, e2.button.y}, &cam)) {
+                                                        point -= coutPiege;
+                                                        existPiege[indicePiege] = true;
+                                                        argumentsPiege[indicePiege] = (argUniteAllie) {&running, pieges[indicePiege], listeEntite, M, &defeat, &graphe, &existPiege[indicePiege]};
+                                                        pthread_create(&threadPiege[indicePiege], NULL, ami, &argumentsPiege[indicePiege]);
+                                                        indicePiege++;
+                                                    }
+                                                }
+                                                break;
+                                            case SDL_BUTTON_RIGHT:
+                                                if (point >= coutPiege) {
+                                                    printf("Nouveau piege\n");
+                                                    if (posePiege2(listeEntite, M, pieges, indicePiege, texturePiege2, (Coordonnees) {e2.button.x, e2.button.y}, &cam)) {
+                                                        point -= coutPiege;
+                                                        existPiege[indicePiege] = true;
+                                                        argumentsPiege[indicePiege] = (argUniteAllie) {&running, pieges[indicePiege], listeEntite, M, &defeat, &graphe, &existPiege[indicePiege]};
+                                                        pthread_create(&threadPiege[indicePiege], NULL, ami, &argumentsPiege[indicePiege]);
+                                                        indicePiege++;
+                                                    }
+                                                }
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+
                         default:
                             controlCam(&cam, 40, 0.05, &e, 1, zoomMin);
                             break;
                     }
                     break;
-            
+                case SDL_MOUSEBUTTONDOWN:
+                    switch (e.button.button) {
+                        case SDL_BUTTON_LEFT:
+                            printf("Nouvelle entite\n");
+                            selectionneEntite(listeEntite, (Coordonnees) {e.button.x, e.button.y}, M, &cam);
+                            break;
+                        case SDL_BUTTON_RIGHT:
+                            donnerObjectif(listeEntite, (Coordonnees) {e.button.x, e.button.y}, M, &cam);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
                 default:
                 break;
             }
@@ -444,12 +529,15 @@ int jeu(SDL_Window *window, parametre *para){
                             running = false;
                             break;
                         case SDLK_a:
-                            printf("Nouvelle entite\n");
-                            if (spawnAllie(listeEntite, M, unitesAllie, indiceUniteAllie, tE_allie)) {
-                                existAllie[indiceUniteAllie] = true;
-                                argumentsAllies[indiceUniteAllie] = (argUniteAllie) {&running, unitesAllie[indiceUniteAllie], listeEntite, M, &defeat, &graphe, &existAllie[indiceUniteAllie]};
-                                pthread_create(&threadAllie[indiceUniteAllie], NULL, ami, &argumentsAllies[indiceUniteAllie]);
-                                indiceUniteAllie++;
+                            if (point >= coutAllie) {
+                                point -= coutAllie;  
+                                printf("Nouvelle entite\n");
+                                if (spawnAllie(listeEntite, M, unitesAllie, indiceUniteAllie, tE_allie)) {
+                                    existAllie[indiceUniteAllie] = true;
+                                    argumentsAllies[indiceUniteAllie] = (argUniteAllie) {&running, unitesAllie[indiceUniteAllie], listeEntite, M, &defeat, &graphe, &existAllie[indiceUniteAllie]};
+                                    pthread_create(&threadAllie[indiceUniteAllie], NULL, ami, &argumentsAllies[indiceUniteAllie]);
+                                    indiceUniteAllie++;
+                                }
                             }
                             break;
                         default:

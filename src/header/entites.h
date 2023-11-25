@@ -133,6 +133,10 @@ void donnerObjectif(ListeEntite *listeEntite, Coordonnees coordonnees, map *M, c
 
 bool spawnAllie(ListeEntite *listeEntite, map *M, Entite **unite, int indice, texture_entite *textureEntite);
 
+bool posePiege1(ListeEntite *listeEntite, map *M, Entite **piege, int indice, texture_entite *textureEntite, Coordonnees coordonnees, camera *cam);
+
+bool posePiege2(ListeEntite *listeEntite, map *M, Entite **piege, int indice, texture_entite *textureEntite, Coordonnees coordonnees, camera *cam);
+
 //========== Fin Entité ==========
 
 // //========== Unité ==========

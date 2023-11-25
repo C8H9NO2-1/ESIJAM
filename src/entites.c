@@ -105,6 +105,10 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
         listeEntite->entites[coordonnees.x][coordonnees.y][1] = entite;
     }
 
+    if (typeEntite == PIEGE1) {
+        entite->pointsAttaque = 0;
+    }
+
     entite->indiceTexture = 0;
     entite->blink = false;
     entite->selectionne = false;
@@ -146,6 +150,7 @@ void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map *
     for(int i = 0; i < M->largeur/2; i++){
         for(int j = 0; j < M->hauteur/2; j++){
             if(listeEntite->entites[i][j][0] != NULL)
+                afficherEntite(listeEntite->entites[i][j][1], renderer, cam);
                 afficherEntite(listeEntite->entites[i][j][0], renderer, cam);
         }
     }
@@ -168,10 +173,10 @@ void afficherEntite(Entite *entite, SDL_Renderer *renderer, camera *cam) {
         // SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
         break;
     case PIEGE1:
-        SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
+        SDL_RenderCopy(renderer, entite->texture->tab[0], NULL, &rect);
         break;
     case PIEGE2:
-        SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
+        SDL_RenderCopy(renderer, entite->texture->tab[2], NULL, &rect);
         break;
     default:
         break;
@@ -290,10 +295,10 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, bool *defeat
         if (listeEntite->entites[xSuivant][ySuivant][1] != NULL) {
             if (listeEntite->entites[xSuivant][ySuivant][1]->typeEntite == PIEGE1) {
                 attaquerEntite(entite, listeEntite->entites[xSuivant][ySuivant][1]); // On détruit le mur cassable
-                // Si le mur n'a plus de points de vie, on le détruit
-                if (listeEntite->entites[xSuivant][ySuivant][1]->pointsVie <= 0) {
-                    detruireEntite(listeEntite->entites[xSuivant][ySuivant][1], listeEntite);
-                }
+                // // Si le mur n'a plus de points de vie, on le détruit
+                // if (listeEntite->entites[xSuivant][ySuivant][1]->pointsVie <= 0) {
+                //     detruireEntite(listeEntite->entites[xSuivant][ySuivant][1], listeEntite);
+                // }
                 // continue;
                 return;
             }
@@ -444,7 +449,7 @@ bool spawnAllie(ListeEntite *listeEntite, map *M, Entite **unite, int indice, te
                 // On initialise l'unité
                 initialiserEntite(entite, AMI, UNITE, (Coordonnees) {largeur / 2 + i, hauteur / 2 + j}, listeEntite, textureEntite, false);
                 // On ajoute l'unité à la liste des entités
-                listeEntite->entites[largeur / 2 + i][hauteur / 2 + j][0] = entite;
+                // listeEntite->entites[largeur / 2 + i][hauteur / 2 + j][0] = entite;
                 // On met l'unité dans le tableau des unités et on met le booléen à false
                 unite[indice] = entite;
                 // On sort de la fonction
@@ -452,6 +457,52 @@ bool spawnAllie(ListeEntite *listeEntite, map *M, Entite **unite, int indice, te
             }
         }
     }
+
+    return false;
+}
+
+bool posePiege1(ListeEntite *listeEntite, map *M, Entite **piege, int indice, texture_entite *textureEntite, Coordonnees coordonnees, camera *cam) {
+    int largeur = M->largeur / 2;
+    int hauteur = M->hauteur / 2;
+
+    // On récupère les coordonnées de la souris
+    int x = coordonnees.x / cam->zoom;
+    int y = coordonnees.y / cam->zoom;
+
+    int coordx = (x + (cam->x-(cam->w)/2)/cam->zoom) / 64;
+    int coordy = (y + (cam->y-(cam->h)/2)/cam->zoom) / 64;
+
+    // On vérifie que la case est vide
+    if (listeEntite->entites[coordx][coordy][1]->typeEntite == -1) {
+        Entite *entite = (Entite *) malloc(sizeof(Entite));
+        initialiserEntite(entite, AMI, PIEGE1, (Coordonnees) {coordx, coordy}, listeEntite, textureEntite, false);
+        // listeEntite->entites[coordx][coordy][1] = entite;
+        piege[indice] = entite;
+        return true;
+    }  
+
+    return false;
+}
+
+bool posePiege2(ListeEntite *listeEntite, map *M, Entite **piege, int indice, texture_entite *textureEntite, Coordonnees coordonnees, camera *cam) {
+    int largeur = M->largeur / 2;
+    int hauteur = M->hauteur / 2;
+
+    // On récupère les coordonnées de la souris
+    int x = coordonnees.x / cam->zoom;
+    int y = coordonnees.y / cam->zoom;
+
+    int coordx = (x + (cam->x-(cam->w)/2)/cam->zoom) / 64;
+    int coordy = (y + (cam->y-(cam->h)/2)/cam->zoom) / 64;
+
+    // On vérifie que la case est vide
+    if (listeEntite->entites[coordx][coordy][1]->typeEntite == -1) {
+        Entite *entite = (Entite *) malloc(sizeof(Entite));
+        initialiserEntite(entite, AMI, PIEGE2, (Coordonnees) {coordx, coordy}, listeEntite, textureEntite, false);
+        // listeEntite->entites[coordx][coordy][1] = entite;
+        piege[indice] = entite;
+        return true;
+    }  
 
     return false;
 }
