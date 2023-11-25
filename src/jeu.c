@@ -433,6 +433,11 @@ int jeu(SDL_Window *window, parametre *para){
     SDL_Event e2;
     bool editionPiege = false;
     while(running){
+        if (defeat) {
+
+            SDL_Delay(10000);
+            running = false;
+        }
         if(periodePause){
             SDL_WaitEvent(&e);
             switch (e.type){
