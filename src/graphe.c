@@ -100,9 +100,10 @@ Graphe matriceAdjacences(map m, ListeEntite *listeEntite) {
 
     //========== Allié ==========
     // On met les cases adjacentes à 1
+    // On compte le Nexus comme un mur
     for (int i = 0; i < largeur; i++) {
         for (int j = 0; j < hauteur; j++) {
-            if ((m.tab[2 * i + 2 * j * m.largeur] % 4) == 0 && listeEntite->entites[i][j][1]->typeEntite != PIEGE1) {
+            if (((m.tab[2 * i + 2 * j * m.largeur] % 4) == 0 && listeEntite->entites[i][j][1]->typeEntite != PIEGE1) && (i != largeur / 2 || j != hauteur / 2)) {
                 int id = identifiantCase((Coordonnees) {i, j}, m);
                 int idVoisins[4] = {id - largeur, id - 1, id + 1, id + largeur};
 

@@ -42,6 +42,9 @@ struct argUniteAllie {
     map *m;
     bool *fin;
     bool *defeat;
+    bool *nouveauCheminNecessaire;
+    Coordonnees *destination;
+    Graphe *graphe;
 };
 typedef struct argUniteAllie argUniteAllie;
 //Fonction qui est executer dans un autre thread que le principal et qui permet d'afficher selon des FPS
@@ -113,9 +116,17 @@ void *ami(void *data) {
     bool *fin = arg->fin;
     bool *defeat = arg->defeat;
     bool exist = true;
+    bool *nouveauCheminNecessaire = arg->nouveauCheminNecessaire;
+    Coordonnees *destination = arg->destination;
+    Graphe *graphe = arg->graphe;
 
     while (*running && !(*defeat) && exist) {
         Uint64 frame_start = SDL_GetTicks64();
+
+        if (*nouveauCheminNecessaire) {
+            nouveauCheminAmi(entite, listeEntite, m, *graphe, *destination);
+            *nouveauCheminNecessaire = false;
+        }
 
         uniteAmie(entite, listeEntite, m, &exist);
 
@@ -293,9 +304,19 @@ int jeu(SDL_Window *window, parametre *para){
 
     //!========== Code de Test ==========
 
+    Entite *nexus = malloc(sizeof(Entite));
+
     ListeEntite *listeEntite = initialiserListeEntite(*M);
     texture_entite *tE;
-    chargerTextureEntite(&tE, "data/texture/sprite.png", "data/texture/sprite.png", renderer);
+    chargerTextureEntite(&tE, "data/texture/sprite.png", renderer);
+
+    texture_entite *tE2;
+    chargerTextureEntite(&tE2, "data/texture/sprite2.png", renderer);
+
+    texture_entite *textureNexus;
+    chargerTextureEntite(&textureNexus, "data/texture/betaNexus.png", renderer);
+
+    initialiserEntite(nexus, AMI, UNITE, (Coordonnees) {M->largeur / 4, M->hauteur / 4}, listeEntite, textureNexus);
 
     // On met les points de vie du nexus très haut pour les tests
     listeEntite->entites[M->largeur / 4][M->hauteur / 4][0]->pointsVie = 1000000;

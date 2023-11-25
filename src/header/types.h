@@ -48,16 +48,8 @@ enum TypeEntite {
 typedef struct texture_entite texture_entite;
 struct texture_entite {
     // Pour les unités
-    SDL_Texture **textureAmi; // Tableau des textures des unités amies
-    int nbTextureAmi;
-    SDL_Texture **textureEnnemi; // Tableau des textures des unités ennemies
-    int nbTextureEnnemi; // À priori égal à nbTextureAmi
-
-    // Pour les pièges
-    SDL_Texture **texturePiege1; // Tableau des textures des pièges 1 (murs cassables)
-    int nbTexturePiege1;
-    SDL_Texture **texturePiege2; // Tableau des textures des pièges 2 (à définir)
-    int nbTexturePiege2; // À priori égal à nbTexturePiege1
+    SDL_Texture **tab; // Tableau des textures des unités amies
+    int nbTexture;
 };
 
 typedef struct Entite Entite;
@@ -68,6 +60,7 @@ struct Entite {
     TypeEntite typeEntite;
     Coordonnees coordonnees;
     texture_entite *texture;
+    int indiceTexture;
 
     ElementChemin *element;
 };
