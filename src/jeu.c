@@ -90,7 +90,7 @@ void *ennemi(void *data) {
 
         uniteEnnemie(entite, listeEntite, m, defeat, exist);
 
-        while(SDL_GetTicks64() - frame_start < 1000 / 5)
+        while(SDL_GetTicks64() - frame_start < 700)
             SDL_Delay(1);
     }
 
@@ -123,7 +123,7 @@ void *ami(void *data) {
 
         uniteAmie(entite, listeEntite, m, exist);
 
-        while(SDL_GetTicks64() - frame_start < 1000 / 5)
+        while(SDL_GetTicks64() - frame_start < 700)
             SDL_Delay(1);
     }
 
@@ -256,7 +256,7 @@ void *ajoutEnnemi(void *data){
 
             }
             nbUniteAFaireApparaitre--;
-            SDL_Delay(5000);
+            SDL_Delay(1500);
         }
         else{
             SDL_Delay(5);
