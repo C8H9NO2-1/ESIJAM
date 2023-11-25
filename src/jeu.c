@@ -348,7 +348,7 @@ int jeu(SDL_Window *window, parametre *para){
     pthread_create(&threadNexus, NULL, ami, &argumentsNexus);
 
     // On met les points de vie du nexus très haut pour les tests
-    // listeEntite->entites[M->largeur / 4][M->hauteur / 4][0]->pointsVie = 1000000;
+    // listeEntite->entites[M->largeur / 4][M->hauteur / 4][0]->pointsVie = 3;
 
     Graphe graphe = matriceAdjacences(*M, listeEntite);
 
@@ -433,11 +433,6 @@ int jeu(SDL_Window *window, parametre *para){
     SDL_Event e2;
     bool editionPiege = false;
     while(running){
-        if (defeat) {
-
-            SDL_Delay(10000);
-            running = false;
-        }
         if(periodePause){
             SDL_WaitEvent(&e);
             switch (e.type){

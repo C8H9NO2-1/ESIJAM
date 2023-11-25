@@ -17,3 +17,9 @@ Pour placer un piège, entrez en mode construction avec 'p'
     'p' pour quitter le mode construction
 Pour placer une unité, appuyez sur 'a' puis clic gauche ou droit pour la sélectionner et clic droit pour lui donner un objectif.
     Il se peut que les unités ne puissent pas atteindre leur objectif, dans ce cas, elles resteront sur place.
+
+
+## Compilation
+Pour compiler le projet, il faut utiliser la commande `make all` dans le dossier racine du projet.
+Pour lancer le jeu, il faut entrer la commande `./exe/linux/prog` ou `./exe/mac/prog` dans le dossier racine du projet.
+Ou bien lancer prog.exe sous Windows.
