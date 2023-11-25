@@ -35,16 +35,6 @@ struct argUniteEnnemie {
 };
 typedef struct argUniteEnnemie argUniteEnnemie;
 
-struct argUniteAllie {
-    bool *running;
-    Entite *entite;
-    ListeEntite *listeEntite;
-    map *m;
-    bool *fin;
-    bool *defeat;
-    Graphe *graphe;
-};
-typedef struct argUniteAllie argUniteAllie;
 //Fonction qui est executer dans un autre thread que le principal et qui permet d'afficher selon des FPS
 void *afficheVideo(void *data){
     argAfficheVideo *arg = (argAfficheVideo*) data;
@@ -229,22 +219,22 @@ void *ajoutEnnemi(void *data){
             pthread_t threadEnnemi;
             switch(frame_start%4){
                 case 0 :
-                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 0}, listeEntite, tE);
+                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 0}, listeEntite, tE, false);
                     entite->element = listeCheminsEnnemis->chemin1->premier;
                     pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
                     break;
                 case 1:
-                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {24, M->hauteur / 4}, listeEntite, tE);
+                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {24, M->hauteur / 4}, listeEntite, tE, false);
                     entite->element = listeCheminsEnnemis->chemin2->premier;
                     pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
                     break;
                 case 2:
-                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 24}, listeEntite, tE);
+                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 24}, listeEntite, tE, false);
                     entite->element = listeCheminsEnnemis->chemin3->premier;
                     pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
                     break;
                 case 3:
-                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {0, M->hauteur / 4}, listeEntite, tE);
+                    initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {0, M->hauteur / 4}, listeEntite, tE, false);
                     entite->element = listeCheminsEnnemis->chemin4->premier;
                     pthread_create(&threadEnnemi, NULL, ennemi, &arguments);
                     break;
@@ -299,8 +289,15 @@ int jeu(SDL_Window *window, parametre *para){
     TTF_CloseFont(font);
     //---------------------------------------Fin Teste UI--------------
 
-    //!========== Pour les unités alliées ==========
-    
+    //!========== Pour les unités alliées et les pièges ==========
+    int indiceUniteAllie = 0;
+    // int indicePiege = 0;
+    argUniteAllie argumentsAllies[100];
+    Entite *unitesAllie[100];
+    bool *finAllie[100];
+    pthread_t threadAllie[100];
+
+    //!========== Fin des unités alliées et les pièges ==========
 
     //!========== Code de Test ==========
 
@@ -316,7 +313,7 @@ int jeu(SDL_Window *window, parametre *para){
     texture_entite *textureNexus;
     chargerTextureEntite(&textureNexus, "data/texture/betaNexus.png", "data/texture/sprite2.png", renderer);
 
-    initialiserEntite(nexus, AMI, UNITE, (Coordonnees) {M->largeur / 4, M->hauteur / 4}, listeEntite, textureNexus);
+    initialiserEntite(nexus, AMI, UNITE, (Coordonnees) {M->largeur / 4, M->hauteur / 4}, listeEntite, textureNexus, true);
 
     // On met les points de vie du nexus très haut pour les tests
     listeEntite->entites[M->largeur / 4][M->hauteur / 4][0]->pointsVie = 1000000;
@@ -410,7 +407,9 @@ int jeu(SDL_Window *window, parametre *para){
                             break;
                         case SDLK_a:
                             printf("Nouvelle entite\n");
-                            
+                            spawnAllie(listeEntite, M, unitesAllie, finAllie, indiceUniteAllie, tE_allie);
+                            argumentsAllies[indiceUniteAllie] = (argUniteAllie) {&running, unitesAllie[indiceUniteAllie], listeEntite, M, finAllie[indiceUniteAllie], &defeat, &graphe};
+                            pthread_create(&threadAllie[indiceUniteAllie], NULL, ami, &argumentsAllies[indiceUniteAllie]);
                             break;
                         default:
                             controlCam(&cam, 40, 0.05, &e, 1, zoomMin);

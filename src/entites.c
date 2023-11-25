@@ -83,7 +83,7 @@ void freeListeEntite(ListeEntite *listeEntite, map m) {
     free(listeEntite);
 }
 
-void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite, texture_entite *texture) {
+void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite, texture_entite *texture, bool estNexus) {
     // On initialise les variables qui ne dépendent pas du type d'entite avec lequel on travaille
     
     entite->coordonnees = coordonnees;
@@ -109,6 +109,12 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
     entite->blink = false;
     entite->selectionne = false;
     entite->nouvelObjectif = false;
+
+    // Si c'est le nexus on lui donne plus de PV
+    if (estNexus) {
+        entite->pointsVie = 5000;
+        entite->pointsAttaque = 10;
+    }
 }
 
 void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
@@ -201,6 +207,9 @@ void attaquerEntite(Entite *entite, Entite *cible) {
     if (entite->allegeance != cible->allegeance) {
         cible->pointsVie -= entite->pointsAttaque;
         cible->blink = true;
+    }
+    if (entite->typeEntite == PIEGE2) {
+        entite->pointsVie -= 1;
     }
 }
 
@@ -409,6 +418,30 @@ void donnerObjectif(ListeEntite *listeEntite, Coordonnees coordonnees, map *M, c
                     listeEntite->entites[i][j][0]->objectif = (Coordonnees) {(x + (cam->x-(cam->w)/2)/cam->zoom) / 64, (y + (cam->y-(cam->h)/2)/cam->zoom) / 64};
                     listeEntite->entites[i][j][0]->element->caseSuivante = NULL;
                 }
+            }
+        }
+    }
+}
+
+void spawnAllie(ListeEntite *listeEntite, map *M, Entite **unite, bool *fin, int indice, texture_entite *textureEntite) {
+    int largeur = M->largeur / 2;
+    int hauteur = M->hauteur / 2;
+
+    // On cherche une case vide autour du nexus
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            if (listeEntite->entites[largeur / 2 + i][hauteur / 2 + j][0]->typeEntite == -1) {
+                // On crée une entité
+                Entite *entite = (Entite *) malloc(sizeof(Entite));
+                // On initialise l'unité
+                initialiserEntite(entite, AMI, UNITE, (Coordonnees) {largeur / 2 + i, hauteur / 2 + j}, listeEntite, textureEntite, false);
+                // On ajoute l'unité à la liste des entités
+                listeEntite->entites[largeur / 2 + i][hauteur / 2 + j][0] = entite;
+                // On met l'unité dans le tableau des unités et on met le booléen à false
+                unite[indice] = entite;
+                fin[indice] = false;
+                // On sort de la fonction
+                return;
             }
         }
     }

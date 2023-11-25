@@ -1,6 +1,15 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
+typedef uint8_t uMap;
+struct map
+{
+    uMap *tab;
+    int largeur;
+    int hauteur;
+};
+typedef struct map map;
+
 //========== Coordonnées ==========
 typedef struct Coordonnees Coordonnees;
 struct Coordonnees {
@@ -109,5 +118,15 @@ struct mailleFin{
     listeFin next;
 };
 
+struct argUniteAllie {
+    bool *running;
+    Entite *entite;
+    ListeEntite *listeEntite;
+    map *m;
+    bool *fin;
+    bool *defeat;
+    Graphe *graphe;
+};
+typedef struct argUniteAllie argUniteAllie;
 
 #endif

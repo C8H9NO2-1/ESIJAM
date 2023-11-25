@@ -2,15 +2,6 @@
 #define __MAP_H__
 
 #include "parametre.h"
-typedef uint8_t uMap;
-
-struct map
-{
-    uMap *tab;
-    int largeur;
-    int hauteur;
-};
-typedef struct map map;
 
 enum typeU{
     SOL, PLAFOND, MUR

@@ -5,10 +5,10 @@
 #ifndef __ENTITE_H__
 #define __ENTITE_H__
 
-#define POINTS_DE_VIE_INITIAUX 100
-#define POINTS_ATTAQUE 10
+#define POINTS_DE_VIE_INITIAUX 25
+#define POINTS_ATTAQUE 4
 #define DURABILITE_PIEGE 10
-#define DEGATS_INFLIGES 10
+#define DEGATS_INFLIGES 7
 
 // #define WIDTH_MAP 100
 // #define HEIGHT_MAP 56
@@ -48,7 +48,7 @@ void freeListeEntite(ListeEntite *listeEntite, map m);
  * @param coordonnees Coordonnées initiales de l'entité
  * @param listeEntite Pointeur vers la liste des entités
  */
-void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite, texture_entite *texture);
+void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEntite, Coordonnees coordonnees, ListeEntite *listeEntite, texture_entite *texture, bool estNexus);
 
 /**
  * @brief Fonction qui permet de détruire une entité
@@ -130,6 +130,8 @@ void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map *
 void selectionneEntite(ListeEntite *listeEntite, Coordonnees coordonnees, map *M, camera *cam);
 
 void donnerObjectif(ListeEntite *listeEntite, Coordonnees coordonnees, map *M, camera *cam);
+
+void spawnAllie(ListeEntite *listeEntite, map *M, Entite **unite, bool *fin, int indice, texture_entite *textureEntite);
 
 //========== Fin Entité ==========
 
