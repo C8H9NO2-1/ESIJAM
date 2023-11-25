@@ -47,8 +47,9 @@ enum TypeEntite {
 
 typedef struct texture_entite texture_entite;
 struct texture_entite {
-    // Pour les unités
-    SDL_Texture **tab; // Tableau des textures des unités amies
+    SDL_Texture **tab; // Tableau des textures
+    SDL_Texture *blink; // Texture de l'entité qui clignote
+    SDL_Texture **selectionne; // Tableau des textures de l'entité si celle-ci est sélectionnée par le joueur
     int nbTexture;
 };
 
@@ -61,6 +62,12 @@ struct Entite {
     Coordonnees coordonnees;
     texture_entite *texture;
     int indiceTexture;
+    bool blink;
+    bool selectionne;
+
+    // Nécessaires pour les unités alliées
+    bool nouvelObjectif;
+    Coordonnees objectif;
 
     ElementChemin *element;
 };

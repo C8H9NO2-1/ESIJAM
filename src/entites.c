@@ -106,7 +106,10 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
         listeEntite->entites[coordonnees.x][coordonnees.y][1] = entite;
     }
 
-    printf("Entité initialisée\n");
+    entite->indiceTexture = 0;
+    entite->blink = false;
+    entite->selectionne = false;
+    entite->nouvelObjectif = false;
 }
 
 void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
@@ -137,23 +140,29 @@ void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map *
 }
 
 void afficherEntite(Entite *entite, SDL_Renderer *renderer, camera *cam) {
-    SDL_Rect rect = {entite->coordonnees.x * 64 -(cam->x-(cam->w)/2)/cam->zoom, entite->coordonnees.y * 64 - ( cam->y-((cam->h)/2))/cam->zoom, TAILLE_TEXTURE_ENTITE-1, TAILLE_TEXTURE_ENTITE-1};
+    SDL_Rect rect = {entite->coordonnees.x * 64 - (cam->x-(cam->w)/2)/cam->zoom, entite->coordonnees.y * 64 - ( cam->y-((cam->h)/2))/cam->zoom, TAILLE_TEXTURE_ENTITE-1, TAILLE_TEXTURE_ENTITE-1};
     // rect.x = rect.x * cam->zoom;
     // rect.y = rect.y * cam->zoom;
     switch (entite->typeEntite) {
     case UNITE:
-        if (entite->allegeance == AMI) {
-            SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
+    case PIEGE1:
+    case PIEGE2:
+        if (entite->blink) {
+            SDL_RenderCopy(renderer, entite->texture->blink, NULL, &rect);
+            entite->blink = false;
+        } else if (entite->selectionne) {
+            SDL_RenderCopy(renderer, entite->texture->selectionne[entite->indiceTexture], NULL, &rect);
         } else {
             SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
         }
+        // SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
         break;
-    case PIEGE1:
-        SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
-        break;
-    case PIEGE2:
-        SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
-        break;
+    // case PIEGE1:
+    //     SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
+    //     break;
+    // case PIEGE2:
+    //     SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
+    //     break;
     default:
         break;
     }
@@ -192,6 +201,7 @@ void deplacementEntite(Entite *entite, Coordonnees coordonnees, map *m, ListeEnt
 void attaquerEntite(Entite *entite, Entite *cible) {
     if (entite->allegeance != cible->allegeance) {
         cible->pointsVie -= entite->pointsAttaque;
+        cible->blink = true;
     }
 }
 
@@ -300,7 +310,7 @@ void uniteAmie(Entite *entite, ListeEntite *listeEntite, map *m, bool *exist) {
 
     // ElementChemin *element = entite->element;
 
-    printf("Test\n");
+    // printf("Test\n");
 
     // On récupère les coordonnées de l'entité
     int x = entite->coordonnees.x;
@@ -331,20 +341,76 @@ void uniteAmie(Entite *entite, ListeEntite *listeEntite, map *m, bool *exist) {
     }
     
     // On parcourt le chemin jusqu'à la fin
-    if (entite->element->caseSuivante->caseSuivante != NULL) {
+    if (entite->element->caseSuivante != NULL && entite->element->caseSuivante->caseSuivante != NULL) {
 
         // On récupère les coordonnées de la case suivante
         int xSuivant = entite->element->caseSuivante->coordonnees.x;
         int ySuivant = entite->element->caseSuivante->coordonnees.y;
-
-        // SDL_Delay(1000);
-        printf("xSuivant = %d / ySuivant = %d\n", xSuivant, ySuivant);
 
         // On déplace l'unité ennemie si il n'y a pas d'autres unités sur cette case
         if (listeEntite->entites[xSuivant][ySuivant][0]->typeEntite == -1) {
             deplacementEntite(entite, (Coordonnees) {xSuivant, ySuivant}, m, listeEntite);
             entite->element = entite->element->caseSuivante;
             // element = element->caseSuivante;
+        }
+    }
+}
+
+void selectionneEntite(ListeEntite *listeEntite, Coordonnees coordonnees, map *M, camera *cam) {
+    int largeur = M->largeur / 2;
+    int hauteur = M->hauteur / 2;
+
+    // On récupère les coordonnées de la souris
+    int x = coordonnees.x / cam->zoom;
+    int y = coordonnees.y / cam->zoom;
+
+    // On parcours les entités
+    for (int i = 0; i < largeur; i++) {
+        for (int j = 0; j < hauteur; j++) {
+            // Si l'entité est une unité
+            if (listeEntite->entites[i][j][0] != NULL) {
+                if (listeEntite->entites[i][j][0]->typeEntite == UNITE && listeEntite->entites[i][j][0]->allegeance == AMI) {
+                    // Si c'est le nexus on ne le sélectionne pas
+                    if (i == largeur / 2 && j == hauteur / 2) {
+                        continue;
+                    }
+                    // On convertit les coordonnées de l'entité en coordonnées de la carte
+                    int xEntite = listeEntite->entites[i][j][0]->coordonnees.x * 64 - (cam->x-(cam->w)/2)/cam->zoom;
+                    int yEntite = listeEntite->entites[i][j][0]->coordonnees.y * 64 - ( cam->y-((cam->h)/2))/cam->zoom;
+
+                    // On vérifie si la souris est sur l'entité
+                    if (x >= xEntite - 64 && x <= xEntite + 64 && y >= yEntite - 64 && y <= yEntite + 64) {
+                        // On sélectionne l'entité
+                        listeEntite->entites[i][j][0]->selectionne = true;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void donnerObjectif(ListeEntite *listeEntite, Coordonnees coordonnees, map *M, camera *cam) {
+    int largeur = M->largeur / 2;
+    int hauteur = M->hauteur / 2;
+
+    // On récupère les coordonnées de la souris
+    int x = coordonnees.x / cam->zoom;
+    int y = coordonnees.y / cam->zoom;
+
+    // On parcours les entités
+    for (int i = 0; i < largeur; i++) {
+        for (int j = 0; j < hauteur; j++) {
+            // Si l'entité est une unité
+            if (listeEntite->entites[i][j][0] != NULL) {
+                if (listeEntite->entites[i][j][0]->typeEntite == UNITE && listeEntite->entites[i][j][0]->allegeance == AMI && listeEntite->entites[i][j][0]->selectionne) {
+                    // On donne à l'unité un nouvel objectif et on la déselectionne
+                    listeEntite->entites[i][j][0]->selectionne = false;
+                    listeEntite->entites[i][j][0]->nouvelObjectif = true;
+                    listeEntite->entites[i][j][0]->objectif = (Coordonnees) {(x + (cam->x-(cam->w)/2)/cam->zoom) / 64, (y + (cam->y-(cam->h)/2)/cam->zoom) / 64};
+                    listeEntite->entites[i][j][0]->element->caseSuivante = NULL;
+                }
+            }
         }
     }
 }

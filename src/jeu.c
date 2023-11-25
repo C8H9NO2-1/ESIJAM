@@ -42,8 +42,6 @@ struct argUniteAllie {
     bool *fin;
     bool *defeat;
     bool *exist;
-    bool *nouveauCheminNecessaire;
-    Coordonnees *destination;
     Graphe *graphe;
 };
 typedef struct argUniteAllie argUniteAllie;
@@ -114,16 +112,14 @@ void *ami(void *data) {
     bool *fin = arg->fin;
     bool *defeat = arg->defeat;
     bool *exist = arg->exist;
-    bool *nouveauCheminNecessaire = arg->nouveauCheminNecessaire;
-    Coordonnees *destination = arg->destination;
     Graphe *graphe = arg->graphe;
 
     while (*running && !(*defeat) && *exist) {
         Uint64 frame_start = SDL_GetTicks64();
 
-        if (*nouveauCheminNecessaire) {
-            nouveauCheminAmi(entite, listeEntite, m, *graphe, *destination);
-            *nouveauCheminNecessaire = false;
+        if (entite->nouvelObjectif) {
+            nouveauCheminAmi(entite, listeEntite, m, *graphe, entite->objectif);
+            entite->nouvelObjectif = false;
         }
 
         uniteAmie(entite, listeEntite, m, exist);
@@ -188,6 +184,9 @@ int jeu(SDL_Window *window, parametre *para){
     TTF_CloseFont(font);
     //---------------------------------------Fin Teste UI--------------
 
+    //!========== Pour les unités alliées ==========
+    
+
     //!========== Code de Test ==========
 
     Entite *nexus = malloc(sizeof(Entite));
@@ -197,15 +196,16 @@ int jeu(SDL_Window *window, parametre *para){
     Entite *entite3 = malloc(sizeof(Entite));
     ListeEntite *listeEntite = initialiserListeEntite(*M);
     texture_entite *tE;
-    chargerTextureEntite(&tE, "data/texture/sprite.png", renderer);
+    chargerTextureEntite(&tE, "data/texture/sprite.png", "data/texture/sprite3.png", renderer);
 
     texture_entite *tE2;
-    chargerTextureEntite(&tE2, "data/texture/sprite2.png", renderer);
+    chargerTextureEntite(&tE2, "data/texture/sprite2.png", "data/texture/sprite2.png", renderer);
 
     texture_entite *textureNexus;
-    chargerTextureEntite(&textureNexus, "data/texture/betaNexus.png", renderer);
+    chargerTextureEntite(&textureNexus, "data/texture/betaNexus.png", "data/texture/sprite2.png", renderer);
 
     initialiserEntite(nexus, AMI, UNITE, (Coordonnees) {M->largeur / 4, M->hauteur / 4}, listeEntite, textureNexus);
+    nexus->element->caseSuivante = NULL;
 
     initialiserEntite(entite, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 0}, listeEntite, tE2);
     initialiserEntite(entite2, ENNEMI, UNITE, (Coordonnees) {M->largeur / 2 - 1, M->hauteur / 4}, listeEntite, tE2);
@@ -238,11 +238,16 @@ int jeu(SDL_Window *window, parametre *para){
 
     bool finEntite3 = false;
     bool existEntite3 = true;
-    bool nouveauCheminNecessaire = true;
     Coordonnees destination = {M->largeur / 4, 1};
-    argUniteAllie arguments3 = {&running, entite3, listeEntite, M, &finEntite3, &defeat, &existEntite3, &nouveauCheminNecessaire, &destination, &graphe};
+    argUniteAllie arguments3 = {&running, entite3, listeEntite, M, &finEntite3, &defeat, &existEntite3, &graphe};
     pthread_t threadAllie1;
     pthread_create(&threadAllie1, NULL, ami, &arguments3);
+
+    bool finEntite4 = false;
+    bool existEntite4 = true;
+    argUniteAllie arguments4 = {&running, nexus, listeEntite, M, &finEntite4, &defeat, &existEntite4, NULL};
+    pthread_t threadAllie2;
+    pthread_create(&threadAllie2, NULL, ami, &arguments4);
 
     float zoomMin = zoomMinDetermination(M, para);
     //Execution du second thread pour la video
@@ -251,6 +256,10 @@ int jeu(SDL_Window *window, parametre *para){
     pthread_t threadVideo;
     pthread_create(&threadVideo, NULL, afficheVideo, &arg);
   
+
+    //!========== Attention ==========
+    // periodePause = false;
+    // !========== Fin Attention ======
 
     SDL_Event e;
     while(running){
@@ -287,29 +296,39 @@ int jeu(SDL_Window *window, parametre *para){
                         case SDLK_ESCAPE:
                             running = false;
                             break;
-                        // case SDLK_a:
-                        // printf("Nouvelle entite\n");
-                        //     initialiserEntite(entite2, ENNEMI, UNITE, (Coordonnees) {0, M->hauteur/4}, listeEntite, tE);
-                        //     entite2->element = listeCheminsEnnemis->chemin3->premier;
-                        //     pthread_create(&threadEnnemi2, NULL, unite, &arguments2);
-                        //     break;
+                        case SDLK_a:
+                            printf("Nouvelle entite\n");
+                            
+                            break;
                         default:
                             controlCam(&cam, 40, 0.05, &e, 1, zoomMin);
                             break;
                     }
                     break;
+                case SDL_MOUSEBUTTONDOWN:
+                    switch (e.button.button) {
+                        case SDL_BUTTON_LEFT:
+                            selectionneEntite(listeEntite, (Coordonnees) {e.button.x, e.button.y}, M, &cam);
+                            break;
+                        case SDL_BUTTON_RIGHT:
+                            donnerObjectif(listeEntite, (Coordonnees) {e.button.x, e.button.y}, M, &cam);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
             
-            default:
-            break;
+                default:
+                break;
             }
             eventListe_ui(l, &e);
         }
     }
     //Attente de fin d'execution du second thread
     while(!fin) SDL_Delay(50);
-    while(!finEntite) SDL_Delay(50);
-    while(!finEntite2) SDL_Delay(50);
-    while(!finEntite3) SDL_Delay(50);
+    // while(!finEntite) SDL_Delay(50);
+    // while(!finEntite2) SDL_Delay(50);
+    // while(!finEntite3) SDL_Delay(50);
     
 
     freeListe_ui(l);

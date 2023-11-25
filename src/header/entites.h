@@ -127,6 +127,10 @@ void uniteAmie(Entite *entite, ListeEntite *listeEntite, map *m, bool *exist);
  */
 void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M, camera *cam);
 
+void selectionneEntite(ListeEntite *listeEntite, Coordonnees coordonnees, map *M, camera *cam);
+
+void donnerObjectif(ListeEntite *listeEntite, Coordonnees coordonnees, map *M, camera *cam);
+
 //========== Fin Entité ==========
 
 // //========== Unité ==========
