@@ -130,6 +130,13 @@ void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
     entite->typeEntite = -1;
     entite->coordonnees.x = -1;
     entite->coordonnees.y = -1;
+    entite->indiceTexture = -1;
+    entite->blink = false;
+    entite->selectionne = false;
+    entite->nouvelObjectif = false;
+    entite->objectif.x = -1;
+    entite->objectif.y = -1;
+
     
     // free(entite->texture);
     // free(entite->element);
@@ -150,8 +157,6 @@ void afficherEntite(Entite *entite, SDL_Renderer *renderer, camera *cam) {
     // rect.y = rect.y * cam->zoom;
     switch (entite->typeEntite) {
     case UNITE:
-    case PIEGE1:
-    case PIEGE2:
         if (entite->blink) {
             SDL_RenderCopy(renderer, entite->texture->blink, NULL, &rect);
             entite->blink = false;
@@ -162,12 +167,12 @@ void afficherEntite(Entite *entite, SDL_Renderer *renderer, camera *cam) {
         }
         // SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
         break;
-    // case PIEGE1:
-    //     SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
-    //     break;
-    // case PIEGE2:
-    //     SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
-    //     break;
+    case PIEGE1:
+        SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
+        break;
+    case PIEGE2:
+        SDL_RenderCopy(renderer, entite->texture->tab[entite->indiceTexture], NULL, &rect);
+        break;
     default:
         break;
     }
@@ -327,6 +332,7 @@ void uniteAmie(Entite *entite, ListeEntite *listeEntite, map *m, bool *exist) {
     //Si l'entité est détruite on sort de la fonction
     if (entite->pointsVie <= 0) {
         detruireEntite(entite, listeEntite);
+        printf("Unité détruite\n");
         *exist = false;
         return;
     }
@@ -356,10 +362,12 @@ void uniteAmie(Entite *entite, ListeEntite *listeEntite, map *m, bool *exist) {
         int ySuivant = entite->element->caseSuivante->coordonnees.y;
 
         // On déplace l'unité ennemie si il n'y a pas d'autres unités sur cette case
-        if (listeEntite->entites[xSuivant][ySuivant][0]->typeEntite == -1) {
+        if (listeEntite->entites[xSuivant][ySuivant][0] != NULL) {
+            if (listeEntite->entites[xSuivant][ySuivant][0]->typeEntite == -1) {
             deplacementEntite(entite, (Coordonnees) {xSuivant, ySuivant}, m, listeEntite);
             entite->element = entite->element->caseSuivante;
             // element = element->caseSuivante;
+            }
         }
     }
 }
@@ -423,7 +431,7 @@ void donnerObjectif(ListeEntite *listeEntite, Coordonnees coordonnees, map *M, c
     }
 }
 
-void spawnAllie(ListeEntite *listeEntite, map *M, Entite **unite, bool *fin, int indice, texture_entite *textureEntite) {
+bool spawnAllie(ListeEntite *listeEntite, map *M, Entite **unite, int indice, texture_entite *textureEntite) {
     int largeur = M->largeur / 2;
     int hauteur = M->hauteur / 2;
 
@@ -439,12 +447,13 @@ void spawnAllie(ListeEntite *listeEntite, map *M, Entite **unite, bool *fin, int
                 listeEntite->entites[largeur / 2 + i][hauteur / 2 + j][0] = entite;
                 // On met l'unité dans le tableau des unités et on met le booléen à false
                 unite[indice] = entite;
-                fin[indice] = false;
                 // On sort de la fonction
-                return;
+                return true;
             }
         }
     }
+
+    return false;
 }
 
 //========== Fin Entité ==========

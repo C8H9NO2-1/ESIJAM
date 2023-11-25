@@ -32,6 +32,7 @@ struct argUniteEnnemie {
     bool *fin;
     bool *defeat;
     int *nbEnnemiRestant;
+    bool *exist;
 };
 typedef struct argUniteEnnemie argUniteEnnemie;
 
@@ -78,19 +79,19 @@ void *ennemi(void *data) {
     map *m = arg->m;
     bool *fin = arg->fin;
     bool *defeat = arg->defeat;
-    bool exist = true;
+    bool *exist = arg->exist;
+    // bool exist = true;
     int *nbEnnemiR = arg->nbEnnemiRestant;
 
-    while (*running && !(*defeat) && exist) {
+    while (*running && !(*defeat) && *exist) {
         Uint64 frame_start = SDL_GetTicks64();
 
-        uniteEnnemie(entite, listeEntite, m, defeat, &exist);
+        uniteEnnemie(entite, listeEntite, m, defeat, exist);
 
         while(SDL_GetTicks64() - frame_start < 1000 / 5)
             SDL_Delay(1);
     }
 
-    free(entite);
     *fin = true;
     return NULL;
 }
@@ -101,13 +102,13 @@ void *ami(void *data) {
     Entite *entite = arg->entite;
     ListeEntite *listeEntite = arg->listeEntite;
     map *m = arg->m;
-    bool *fin = arg->fin;
     bool *defeat = arg->defeat;
     Graphe *graphe = arg->graphe;
 
-    bool exist = true;
+    bool *exist = arg->exist;
+    // bool exist = true;
 
-    while (*running && !(*defeat) && exist) {
+    while (*running && !(*defeat) && *exist) {
         Uint64 frame_start = SDL_GetTicks64();
 
         if (entite->nouvelObjectif) {
@@ -115,14 +116,15 @@ void *ami(void *data) {
             entite->nouvelObjectif = false;
         }
 
-        uniteAmie(entite, listeEntite, m, &exist);
+        uniteAmie(entite, listeEntite, m, exist);
 
         while(SDL_GetTicks64() - frame_start < 1000 / 5)
             SDL_Delay(1);
     }
 
-    free(entite);
-    *fin = true;
+    printf("Fin du thread\n");
+
+    // *fin = true;
     return NULL;
 }
 
@@ -204,6 +206,9 @@ void *ajoutEnnemi(void *data){
 
     int nbUniteAFaireApparaitre = 0;
 
+    int indiceEnnemi = 0;
+    bool existEnnemi[100000];
+
     while(*running){
         Uint64 frame_start = SDL_GetTicks64();
         if(*periodePause){
@@ -215,7 +220,9 @@ void *ajoutEnnemi(void *data){
             bool *finEntite = malloc(sizeof(bool));
             *finEntite = false;
             ajouteListeFin(liste_fin, finEntite);
-            argUniteEnnemie arguments = {running, entite, listeEntite, M, finEntite, defeat, nombreEnnemieRestant};
+            existEnnemi[indiceEnnemi] = true;
+            argUniteEnnemie arguments = {running, entite, listeEntite, M, finEntite, defeat, nombreEnnemieRestant, &existEnnemi[indiceEnnemi]};
+            indiceEnnemi++;
             pthread_t threadEnnemi;
             switch(frame_start%4){
                 case 0 :
@@ -275,6 +282,7 @@ int jeu(SDL_Window *window, parametre *para){
     //!=========================== Système de Vague =================
     int numeroDeVague =1;
     float dureeEntreChaqueVague = 35./60.;//En minute
+    // float dureeEntreChaqueVague = 1./60.;//En minute
     int nombreDEnnemie = 5;
     float tauxDEnnemisEntreVague = 1.2;
     bool periodePause = true;
@@ -292,10 +300,10 @@ int jeu(SDL_Window *window, parametre *para){
     //!========== Pour les unités alliées et les pièges ==========
     int indiceUniteAllie = 0;
     // int indicePiege = 0;
-    argUniteAllie argumentsAllies[100];
-    Entite *unitesAllie[100];
-    bool *finAllie[100];
-    pthread_t threadAllie[100];
+    argUniteAllie argumentsAllies[1000];
+    Entite *unitesAllie[1000];
+    pthread_t threadAllie[1000];
+    bool existAllie[1000];
 
     //!========== Fin des unités alliées et les pièges ==========
 
@@ -314,13 +322,43 @@ int jeu(SDL_Window *window, parametre *para){
     chargerTextureEntite(&textureNexus, "data/texture/betaNexus.png", "data/texture/sprite2.png", renderer);
 
     initialiserEntite(nexus, AMI, UNITE, (Coordonnees) {M->largeur / 4, M->hauteur / 4}, listeEntite, textureNexus, true);
+    bool existNexus = true;
+    argUniteAllie argumentsNexus = {&running, nexus, listeEntite, M, &defeat, NULL, &existNexus};
+    pthread_t threadNexus;
+    pthread_create(&threadNexus, NULL, ami, &argumentsNexus);
 
     // On met les points de vie du nexus très haut pour les tests
-    listeEntite->entites[M->largeur / 4][M->hauteur / 4][0]->pointsVie = 1000000;
+    // listeEntite->entites[M->largeur / 4][M->hauteur / 4][0]->pointsVie = 1000000;
 
     Graphe graphe = matriceAdjacences(*M, listeEntite);
 
     ListeCheminsEnnemis *listeCheminsEnnemis = calculeCheminsEnnemis(graphe, *M);
+
+    // printf("Test\n");
+
+    // Entite *test = malloc(sizeof(Entite));
+    // initialiserEntite(test, AMI, UNITE, (Coordonnees) {M->largeur / 4 + 3, M->hauteur / 4 - 1}, listeEntite, tE_allie, false);
+    // bool *finTest = false;
+    // bool exist1 = true;
+
+    // argUniteAllie argsAllies = {&running, test, listeEntite, M, finTest, &defeat, &graphe, &exist1};
+    // pthread_t threadAllie1;
+    // pthread_create(&threadAllie1, NULL, ami, &argsAllies);
+
+    // printf("Test\n");
+
+    // Entite *test2 = malloc(sizeof(Entite));
+    // initialiserEntite(test2, ENNEMI, UNITE, (Coordonnees) {M->largeur / 4, 0}, listeEntite, tE_ennemi, false);
+    // bool *finTest2 = false;
+    // bool exist2 = true;
+    
+    // test2->element = listeCheminsEnnemis->chemin1->premier;
+
+    // argUniteEnnemie argsEnnemieTest = {&running, test2, listeEntite, M, finTest2, &defeat, &nombreDEnnemieRestant, &exist2};
+    // pthread_t threadEnnemi1;
+    // pthread_create(&threadEnnemi1, NULL, ennemi, &argsEnnemieTest);
+
+    // printf("Test\n");
 
     //!========== Fin du Test ==========
     float zoomMin = zoomMinDetermination(M, para);
@@ -407,9 +445,12 @@ int jeu(SDL_Window *window, parametre *para){
                             break;
                         case SDLK_a:
                             printf("Nouvelle entite\n");
-                            spawnAllie(listeEntite, M, unitesAllie, finAllie, indiceUniteAllie, tE_allie);
-                            argumentsAllies[indiceUniteAllie] = (argUniteAllie) {&running, unitesAllie[indiceUniteAllie], listeEntite, M, finAllie[indiceUniteAllie], &defeat, &graphe};
-                            pthread_create(&threadAllie[indiceUniteAllie], NULL, ami, &argumentsAllies[indiceUniteAllie]);
+                            if (spawnAllie(listeEntite, M, unitesAllie, indiceUniteAllie, tE_allie)) {
+                                existAllie[indiceUniteAllie] = true;
+                                argumentsAllies[indiceUniteAllie] = (argUniteAllie) {&running, unitesAllie[indiceUniteAllie], listeEntite, M, &defeat, &graphe, &existAllie[indiceUniteAllie]};
+                                pthread_create(&threadAllie[indiceUniteAllie], NULL, ami, &argumentsAllies[indiceUniteAllie]);
+                                indiceUniteAllie++;
+                            }
                             break;
                         default:
                             controlCam(&cam, 40, 0.05, &e, 1, zoomMin);

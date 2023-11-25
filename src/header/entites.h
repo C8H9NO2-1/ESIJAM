@@ -131,7 +131,7 @@ void selectionneEntite(ListeEntite *listeEntite, Coordonnees coordonnees, map *M
 
 void donnerObjectif(ListeEntite *listeEntite, Coordonnees coordonnees, map *M, camera *cam);
 
-void spawnAllie(ListeEntite *listeEntite, map *M, Entite **unite, bool *fin, int indice, texture_entite *textureEntite);
+bool spawnAllie(ListeEntite *listeEntite, map *M, Entite **unite, int indice, texture_entite *textureEntite);
 
 //========== Fin Entité ==========
 

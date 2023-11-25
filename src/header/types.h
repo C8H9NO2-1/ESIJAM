@@ -123,9 +123,9 @@ struct argUniteAllie {
     Entite *entite;
     ListeEntite *listeEntite;
     map *m;
-    bool *fin;
     bool *defeat;
     Graphe *graphe;
+    bool *exist;
 };
 typedef struct argUniteAllie argUniteAllie;
 
