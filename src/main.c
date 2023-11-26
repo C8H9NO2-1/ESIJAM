@@ -20,7 +20,7 @@ int main(int argc, char *argv[]){
     
     #ifndef __APPLE__
     IMG_Init(IMG_INIT_PNG);
-    MIX_Init(MIX_INIT_MP3);
+    //MIX_Init(MIX_INIT_MP3);
     #endif
     TTF_Init();
 

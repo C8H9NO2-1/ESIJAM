@@ -9,8 +9,8 @@ ifeq ($(OS), Windows_NT)
 else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S), Linux)
-		FLAGS_C = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lSDL2
-		FLAGS_E = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lSDL2
+		FLAGS_C = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lSDL2 -pthread
+		FLAGS_E = -lSDL2main -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lSDL2 -pthread
 		SE = linux
 	endif
 	ifeq ($(UNAME_S), Darwin)

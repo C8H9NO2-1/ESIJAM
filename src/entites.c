@@ -90,6 +90,7 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
     entite->typeEntite = typeEntite;
     entite->texture = texture;
     entite->element = (ElementChemin *) malloc(sizeof(ElementChemin));
+    entite->element->caseSuivante = NULL;
     // Si l'entite est une unite
     if (typeEntite == UNITE) {
         entite->pointsVie = POINTS_DE_VIE_INITIAUX;
@@ -354,11 +355,9 @@ void uniteAmie(Entite *entite, ListeEntite *listeEntite, map *m, bool *exist) {
     // On récupère les coordonnées de l'entité
     int x = entite->coordonnees.x;
     int y = entite->coordonnees.y;
-
     //Si l'entité est détruite on sort de la fonction
     if (entite->pointsVie <= 0) {
         detruireEntite(entite, listeEntite);
-        printf("Unité détruite\n");
         *exist = false;
         return;
     }
@@ -379,20 +378,20 @@ void uniteAmie(Entite *entite, ListeEntite *listeEntite, map *m, bool *exist) {
             }
         }
     }
-    
     // On parcourt le chemin jusqu'à la fin
-    if (entite->element->caseSuivante != NULL && entite->element->caseSuivante->caseSuivante != NULL) {
+    if (entite->element->caseSuivante != NULL) {
+        if(entite->element->caseSuivante->caseSuivante != NULL){
+            // On récupère les coordonnées de la case suivante
+            int xSuivant = entite->element->caseSuivante->coordonnees.x;
+            int ySuivant = entite->element->caseSuivante->coordonnees.y;
 
-        // On récupère les coordonnées de la case suivante
-        int xSuivant = entite->element->caseSuivante->coordonnees.x;
-        int ySuivant = entite->element->caseSuivante->coordonnees.y;
-
-        // On déplace l'unité ennemie si il n'y a pas d'autres unités sur cette case
-        if (listeEntite->entites[xSuivant][ySuivant][0] != NULL) {
-            if (listeEntite->entites[xSuivant][ySuivant][0]->typeEntite == -1) {
-            deplacementEntite(entite, (Coordonnees) {xSuivant, ySuivant}, m, listeEntite);
-            entite->element = entite->element->caseSuivante;
-            // element = element->caseSuivante;
+            // On déplace l'unité ennemie si il n'y a pas d'autres unités sur cette case
+            if (listeEntite->entites[xSuivant][ySuivant][0] != NULL) {
+                if (listeEntite->entites[xSuivant][ySuivant][0]->typeEntite == -1) {
+                deplacementEntite(entite, (Coordonnees) {xSuivant, ySuivant}, m, listeEntite);
+                entite->element = entite->element->caseSuivante;
+                // element = element->caseSuivante;
+                }
             }
         }
     }

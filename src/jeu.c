@@ -51,7 +51,6 @@ void *afficheVideo(void *data){
     ui_liste *l = arg->l;
 
     ListeEntite *listeEntite = arg->listeEntite;
-
     while(*running) {
         Uint64 frame_start = SDL_GetTicks64();
 
@@ -112,17 +111,13 @@ void *ami(void *data) {
 
     bool *exist = arg->exist;
     // bool exist = true;
-
     while (*running && !(*defeat) && *exist) {
         Uint64 frame_start = SDL_GetTicks64();
-
         if (entite->nouvelObjectif) {
             nouveauCheminAmi(entite, listeEntite, m, *graphe, entite->objectif);
             entite->nouvelObjectif = false;
         }
-
         uniteAmie(entite, listeEntite, m, exist);
-
         while(SDL_GetTicks64() - frame_start < 700)
             SDL_Delay(1);
     }
@@ -156,7 +151,6 @@ void *phase(void *data){
     bool *running = argu->running;
     int *PV_poulpy = argu->PV_poulpy;
     bool *fin = argu->fin;
-
     while(*running){
         if(*periodePause){
             *nombreDEnnemie *= (*tauxDEnnemisEntreVague);
@@ -207,7 +201,7 @@ void *ajoutEnnemi(void *data){
     int *nombreEnnemie = arg->nombreEnnemi;
     int *nombreEnnemieRestant = arg->nombreEnnemiRestant;
     bool *defeat = arg->defeat;
-    listeFin *liste_fin = arg->liste_fin;
+    //listeFin *liste_fin = arg->liste_fin;
     ListeCheminsEnnemis *listeCheminsEnnemis = arg->listeCheminsEnnemis;
 
     int *points = arg->points;
@@ -227,7 +221,7 @@ void *ajoutEnnemi(void *data){
             Entite *entite = malloc(sizeof(Entite));
             bool *finEntite = malloc(sizeof(bool));
             *finEntite = false;
-            ajouteListeFin(liste_fin, finEntite);
+            //ajouteListeFin(liste_fin, finEntite);
             existEnnemi[indiceEnnemi] = true;
             argUniteEnnemie arguments = {running, entite, listeEntite, M, finEntite, defeat, nombreEnnemieRestant, &existEnnemi[indiceEnnemi], points};
             indiceEnnemi++;
@@ -272,7 +266,7 @@ int jeu(SDL_Window *window, parametre *para){
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool running = true;
-    listeFin liste_fin = initListeFin();
+    //listeFin liste_fin = initListeFin();
     texture_map* tM;
     tM = chargeTextureMap("data/texture/murSolPlafond.png", renderer);
 
@@ -347,10 +341,10 @@ int jeu(SDL_Window *window, parametre *para){
     texture_entite *texturePiege2;
     chargerTexturePiege2(&texturePiege2, "data/texture/piege2.png", renderer);
 
-    initialiserEntite(nexus, AMI, UNITE, (Coordonnees) {M->largeur / 4, M->hauteur / 4}, listeEntite, textureNexus, true);
     bool existNexus = true;
     argUniteAllie argumentsNexus = {&running, nexus, listeEntite, M, &defeat, NULL, &existNexus};
     pthread_t threadNexus;
+    initialiserEntite(nexus, AMI, UNITE, (Coordonnees) {M->largeur / 4, M->hauteur / 4}, listeEntite, textureNexus, true);
     pthread_create(&threadNexus, NULL, ami, &argumentsNexus);
 
     // On met les points de vie du nexus très haut pour les tests
@@ -393,7 +387,7 @@ int jeu(SDL_Window *window, parametre *para){
     argPhase arg_phase;
     arg_phase.fin = malloc(sizeof(bool));
     *(arg_phase.fin) = false;
-    ajouteListeFin(&liste_fin, arg_phase.fin);
+    //ajouteListeFin(&liste_fin, arg_phase.fin);
     arg_phase.dureeEntreChaqueVague = &dureeEntreChaqueVague;
     arg_phase.nombreDEnnemie = &nombreDEnnemie;
     arg_phase.nombreDEnnemieRestant = &nombreDEnnemieRestant;
@@ -408,9 +402,9 @@ int jeu(SDL_Window *window, parametre *para){
     argAjoutEnnemi arg_ajoutEnnemi;
     arg_ajoutEnnemi.fin = malloc(sizeof(bool));
     *(arg_ajoutEnnemi.fin) = false;
-    ajouteListeFin(&liste_fin, arg_ajoutEnnemi.fin);
+    //ajouteListeFin(&liste_fin, arg_ajoutEnnemi.fin);
     arg_ajoutEnnemi.defeat = &defeat;
-    arg_ajoutEnnemi.liste_fin = &liste_fin;
+    //arg_ajoutEnnemi.liste_fin = &liste_fin;
     arg_ajoutEnnemi.listeCheminsEnnemis = listeCheminsEnnemis;
     arg_ajoutEnnemi.listeEntite = listeEntite;
     arg_ajoutEnnemi.M = M;
@@ -424,7 +418,7 @@ int jeu(SDL_Window *window, parametre *para){
     pthread_create(&threadAjoutEnnemi, NULL, ajoutEnnemi, &arg_ajoutEnnemi);
     //Execution du thread pour la video
     bool *finAffichageVideo = malloc(sizeof(bool));
-    ajouteListeFin(&liste_fin, finAffichageVideo);
+    //ajouteListeFin(&liste_fin, finAffichageVideo);
     camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, zoomMin, LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
     argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, finAffichageVideo, l, listeEntite};
     pthread_t threadVideo;
@@ -468,7 +462,7 @@ int jeu(SDL_Window *window, parametre *para){
                                         switch (e2.button.button) {
                                             case SDL_BUTTON_LEFT:
                                                 if (point >= coutPiege) {
-                                                    printf("Nouveau piege\n");
+                                                    //printf("Nouveau piege\n");
                                                     if (posePiege1(listeEntite, M, pieges, indicePiege, texturePiege1, (Coordonnees) {e2.button.x, e2.button.y}, &cam)) {
                                                         point -= coutPiege;
                                                         existPiege[indicePiege] = true;
@@ -480,7 +474,6 @@ int jeu(SDL_Window *window, parametre *para){
                                                 break;
                                             case SDL_BUTTON_RIGHT:
                                                 if (point >= coutPiege) {
-                                                    printf("Nouveau piege\n");
                                                     if (posePiege2(listeEntite, M, pieges, indicePiege, texturePiege2, (Coordonnees) {e2.button.x, e2.button.y}, &cam)) {
                                                         point -= coutPiege;
                                                         existPiege[indicePiege] = true;
@@ -507,7 +500,7 @@ int jeu(SDL_Window *window, parametre *para){
                 case SDL_MOUSEBUTTONDOWN:
                     switch (e.button.button) {
                         case SDL_BUTTON_LEFT:
-                            printf("Nouvelle entite\n");
+                            //printf("Nouvelle entite\n");
                             selectionneEntite(listeEntite, (Coordonnees) {e.button.x, e.button.y}, M, &cam);
                             break;
                         case SDL_BUTTON_RIGHT:
@@ -536,7 +529,7 @@ int jeu(SDL_Window *window, parametre *para){
                         case SDLK_a:
                             if (point >= coutAllie) {
                                 point -= coutAllie;  
-                                printf("Nouvelle entite\n");
+                                //printf("Nouvelle entite\n");
                                 if (spawnAllie(listeEntite, M, unitesAllie, indiceUniteAllie, tE_allie)) {
                                     existAllie[indiceUniteAllie] = true;
                                     argumentsAllies[indiceUniteAllie] = (argUniteAllie) {&running, unitesAllie[indiceUniteAllie], listeEntite, M, &defeat, &graphe, &existAllie[indiceUniteAllie]};
