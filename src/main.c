@@ -20,8 +20,14 @@ int main(int argc, char *argv[]){
     
     #ifndef __APPLE__
     IMG_Init(IMG_INIT_PNG);
+    MIX_Init(MIX_INIT_MP3);
     #endif
     TTF_Init();
+
+    Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024);
+
+    Mix_Music *opening = Mix_LoadMUS("data/sound/Lancement_de_la_game.mp3");
+    Mix_PlayMusic(opening, -1);
 
     parametre para = recupererParametre();
 

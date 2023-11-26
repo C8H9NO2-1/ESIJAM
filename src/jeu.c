@@ -267,6 +267,9 @@ void *ajoutEnnemi(void *data){
 }
 
 int jeu(SDL_Window *window, parametre *para){
+    Mix_Music *musique = Mix_LoadMUS("data/sound/music.mp3");
+    Mix_PlayMusic(musique, -1);
+
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool running = true;
     listeFin liste_fin = initListeFin();
@@ -276,6 +279,9 @@ int jeu(SDL_Window *window, parametre *para){
     map *M;
     M = lecturePseudoMap("data/map/pseudoMap1.pm", tM, 586);
     bool defeat = false;
+
+    //!========================== Sons du jeu ============================
+    // Mix_Chunk *sonAttaque = Mix_LoadWAV("data/sound/attaque.wav");
 
     //!========================== Dégats ============================
     int degatUnite = 4;

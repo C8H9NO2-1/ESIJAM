@@ -107,6 +107,7 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
 
     if (typeEntite == PIEGE1) {
         entite->pointsAttaque = 0;
+        entite->pointsAttaque = 0;
     }
 
     entite->indiceTexture = 0;
@@ -116,12 +117,20 @@ void initialiserEntite(Entite *entite, Allegeance allegeance, TypeEntite typeEnt
 
     // Si c'est le nexus on lui donne plus de PV
     if (estNexus) {
-        entite->pointsVie = 5000;
+        entite->pointsVie = 1250;
         entite->pointsAttaque = 10;
     }
+
+    Mix_Chunk *sonSpawn = Mix_LoadWAV("data/sound/Une_entite_ou_un_piege_apparait.wav");
+    Mix_PlayChannel(-1, sonSpawn, 0);
 }
 
 void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
+    if (entite->typeEntite == PIEGE1 || entite->typeEntite == PIEGE2) {
+        Mix_Chunk *sonMort = Mix_LoadWAV("data/sound/Un_piege_se_casse.wav");
+        Mix_PlayChannel(-1, sonMort, 0);
+    }
+
     if (entite->typeEntite == UNITE) {
         listeEntite->entites[entite->coordonnees.x][entite->coordonnees.y][0]->typeEntite = -1;
     } else {
@@ -147,6 +156,8 @@ void detruireEntite(Entite *entite, ListeEntite *listeEntite) {
 }
 
 void afficherListeEntite(ListeEntite *listeEntite, SDL_Renderer *renderer, map * M, camera *cam){
+    
+
     for(int i = 0; i < M->largeur/2; i++){
         for(int j = 0; j < M->hauteur/2; j++){
             if(listeEntite->entites[i][j][0] != NULL) {
@@ -224,6 +235,11 @@ void attaquerEntite(Entite *entite, Entite *cible) {
     if (entite->typeEntite == PIEGE2) {
         entite->pointsVie -= 1;
     }
+
+    if (cible->allegeance == ENNEMI && entite->typeEntite == UNITE) {
+        Mix_Chunk *sonAttaque = Mix_LoadWAV("data/sound/attaque.wav");
+        Mix_PlayChannel(-1, sonAttaque, 0);
+    }
 }
 
 //TODO Il faut peut-être ajouter un champ dans la structure d'une entité indiquant quel chemin cette entité emprunte (pas si on fait un thread pour chaque unité)
@@ -259,6 +275,8 @@ void uniteEnnemie(Entite *entite, ListeEntite *listeEntite, map *m, bool *defeat
         attaquerEntite(entite, listeEntite->entites[largeur / 2][hauteur / 2][0]);
         if (listeEntite->entites[largeur / 2][hauteur / 2][0]->pointsVie <= 0) {
             //TODO On détruit le nexus et le joueur à perdu
+            Mix_Chunk *sonDefaite = Mix_LoadWAV("data/sound/Partie_Perdue.wav");
+            Mix_PlayChannel(-1, sonDefaite, 0);
             detruireEntite(listeEntite->entites[largeur / 2][hauteur / 2][0], listeEntite);
             *defeat = true;
             return;
