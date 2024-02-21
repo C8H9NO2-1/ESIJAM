@@ -7,7 +7,7 @@
 #include "header/entites.h"
 #include "header/texture_entites.h"
 #include "header/graphe.h"
-#include "header/ui.h"
+#include "SDL_GUI/SDL_GUI.h"
 
 struct argMenuPrinc{
     fenetre *sortie;
@@ -15,12 +15,7 @@ struct argMenuPrinc{
 };
 typedef struct argMenuPrinc argMenuPrinc;
 
-void boutonNouvellePartie(void* data){
-    argMenuPrinc *arg = (argMenuPrinc*) data;
-    *(arg->running) = false;
-    *(arg->sortie) = fenetre_jeu;
-}
-void boutonChargerPartie(void* data){
+void boutonPartie(void* data){
     argMenuPrinc *arg = (argMenuPrinc*) data;
     *(arg->running) = false;
     *(arg->sortie) = fenetre_jeu;
@@ -30,10 +25,10 @@ void boutonParametre(void* data){
     *(arg->running) = false;
     *(arg->sortie) = fenetre_parametre;
 }
-void boutonCredits(void* data){
+void boutonQuitter(void* data){
     argMenuPrinc *arg = (argMenuPrinc*) data;
     *(arg->running) = false;
-    *(arg->sortie) = fenetre_credit;
+    *(arg->sortie) = fenetre_sortir;
 }
 
 fenetre menuPrincipal(SDL_Window *window, parametre *para){
@@ -42,16 +37,26 @@ fenetre menuPrincipal(SDL_Window *window, parametre *para){
     fenetre sortie = fenetre_sortir;
  
     argMenuPrinc arg = {&sortie, &running};
-
-    ui_liste *l = initList_ui();
-    TTF_Font *font = TTF_OpenFont("data/fonts/roboto.ttf", 2000);
-    initLabel_ui(l, para->coefResolution*LARGEUR/4, 0, para->coefResolution*LARGEUR/2, para->coefResolution*HAUTEUR*3/11, "Poulpy's last stand", renderer, font);
-    TTF_CloseFont(font);
-    font = TTF_OpenFont("data/fonts/roboto.ttf", 200);
-    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/3, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "DEMARRER", boutonNouvellePartie, &arg, renderer, font);
-    initBouton_ui(l, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/2, para->coefResolution*LARGEUR/3, para->coefResolution*HAUTEUR*1/8, "Quitter", boutonCredits, &arg, renderer, font);
-    TTF_CloseFont(font);
     SDL_Event e;
+
+    SDL_Surface *fondS = IMG_Load("data/UI/MenuPrincipal/StaticMP.png");
+    SDL_Texture* fond = SDL_CreateTextureFromSurface(renderer, fondS);
+    SDL_FreeSurface(fondS);
+    
+    SDL_Surface *bouttonStartS = IMG_Load("data/UI/MenuPrincipal/BoutonStart.png");
+    SDL_Texture* bouttonStart = SDL_CreateTextureFromSurface(renderer, bouttonStartS);
+    SDL_GUI_ButtonImg* start = SDL_GUI_InitButtonImg(5.5*para->coefResolution, 2.78*para->coefResolution, renderer, &arg, boutonPartie, bouttonStart, 0, 25);
+    SDL_GUI_SetRatePrintButtonImg(start, para->coefResolution/100.);
+    
+    SDL_Surface *bouttonOptionS = IMG_Load("data/UI/MenuPrincipal/BoutonOption.png");
+    SDL_Texture* bouttonOption = SDL_CreateTextureFromSurface(renderer, bouttonOptionS);
+    SDL_GUI_ButtonImg* option = SDL_GUI_InitButtonImg(5.5*para->coefResolution, 4.08*para->coefResolution, renderer, &arg, boutonParametre, bouttonOption, 0, 25);
+    SDL_GUI_SetRatePrintButtonImg(option, para->coefResolution/100.);
+    
+    SDL_Surface *bouttonQuitterS = IMG_Load("data/UI/MenuPrincipal/BoutonQuitter.png");
+    SDL_Texture* bouttonQuitter = SDL_CreateTextureFromSurface(renderer, bouttonQuitterS);
+    SDL_GUI_ButtonImg* quitter = SDL_GUI_InitButtonImg(5.5*para->coefResolution, 5.38*para->coefResolution, renderer, &arg, boutonQuitter, bouttonQuitter, 0, 25);
+    SDL_GUI_SetRatePrintButtonImg(quitter, para->coefResolution/100.);
 
     while(running){
         Uint64 frame_start = SDL_GetTicks64();
@@ -61,8 +66,11 @@ fenetre menuPrincipal(SDL_Window *window, parametre *para){
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0x00);
         SDL_RenderFillRect(renderer, NULL);
 
+        SDL_RenderCopy(renderer, fond, NULL, NULL);
+        SDL_GUI_PrintButtonImg(start);
+        SDL_GUI_PrintButtonImg(option);
+        SDL_GUI_PrintButtonImg(quitter);
 
-        afficherListe_ui(l, renderer);
         SDL_RenderPresent(renderer);
 
         if(SDL_PollEvent(&e)){
@@ -82,12 +90,18 @@ fenetre menuPrincipal(SDL_Window *window, parametre *para){
                 default :
                     break;
             }
-            eventListe_ui(l, &e);
+            SDL_GUI_EventButtonImg(&e, start);
+            SDL_GUI_EventButtonImg(&e, option);
+            SDL_GUI_EventButtonImg(&e, quitter);
         }
         while(SDL_GetTicks64() - frame_start < 1000 / (Uint64)para->FPS)
             SDL_Delay(1 /* ms */);
     }
 
+    SDL_DestroyTexture(fond);
+    SDL_GUI_FreeButtonImg(start);
+    SDL_GUI_FreeButtonImg(option);
+    SDL_GUI_FreeButtonImg(quitter);
     SDL_DestroyRenderer(renderer);
     
     return sortie;

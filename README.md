@@ -21,5 +21,4 @@ Pour placer une unité, appuyez sur 'a' puis clic gauche ou droit pour la sélec
 
 ## Compilation
 Pour compiler le projet, il faut utiliser la commande `make all` dans le dossier racine du projet.
-Pour lancer le jeu, il faut entrer la commande `./exe/linux/prog` ou `./exe/mac/prog` dans le dossier racine du projet.
-Ou bien lancer prog.exe sous Windows.
+Pour lancer le jeu, il faut entrer la commande `./exe/linux/prog`, `./exe/mac/prog` ou `./exe/win/prog` dans le dossier racine du projet.

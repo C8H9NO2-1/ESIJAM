@@ -7,8 +7,8 @@
 #include "header/entites.h"
 #include "header/texture_entites.h"
 #include "header/graphe.h"
-#include "header/ui.h"
 #include "header/finThread.h"
+#include "SDL_GUI/SDL_GUI.h"
  
 //Argument pour le second thread
 struct argAfficheVideo{
@@ -19,8 +19,9 @@ struct argAfficheVideo{
     texture_map *tM;
     map *M;
     bool *fin;
-    ui_liste *l;
     ListeEntite *listeEntite;
+    SDL_GUI_ProgressBar* lifeBar;
+    Entite* nexus;
 };
 typedef struct argAfficheVideo argAfficheVideo;
 
@@ -48,26 +49,26 @@ void *afficheVideo(void *data){
     parametre *para = arg->para;
     SDL_Renderer *renderer = arg->renderer;
     bool* fin = arg->fin;
-    ui_liste *l = arg->l;
+    SDL_GUI_ProgressBar* lifeBar = arg->lifeBar;
+    Entite* nexus = arg->nexus;
 
     ListeEntite *listeEntite = arg->listeEntite;
     while(*running) {
         Uint64 frame_start = SDL_GetTicks64();
 
         SDL_RenderClear(renderer);
-        //Fond noir
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0x00);
-
-        SDL_RenderFillRect(renderer, NULL);
+        
         afficheMapCamera(cam, M, renderer, tM, listeEntite);
-        afficherListe_ui(l, renderer);
+
+        SDL_GUI_SetRate(lifeBar, nexus->pointsVie/1250.);
+        SDL_GUI_PrintProgressBar(lifeBar);
+
         SDL_RenderPresent(renderer);
 
         while(SDL_GetTicks64() - frame_start < 1000 / (Uint64)para->FPS)
             SDL_Delay(1 /* ms */);
     }
 
-    freeListe_ui(l);
     *fin = true;
     return NULL;
 }
@@ -274,20 +275,20 @@ int jeu(SDL_Window *window, parametre *para){
     M = lecturePseudoMap("data/map/pseudoMap1.pm", tM, 586);
     bool defeat = false;
 
-    //!========================== Sons du jeu ============================
+    //!========================== Sons du jeu =========================
     // Mix_Chunk *sonAttaque = Mix_LoadWAV("data/sound/attaque.wav");
 
-    //!========================== Dégats ============================
+    //!========================== Dégats ==============================
     int degatUnite = 4;
     int degatPiege = 7;
-    //!========================== Fin Dégats ========================
-    //!========================== Système de monnaie ================
+    //!========================== Fin Dégats ==========================
+    //!========================== Système de monnaie ==================
     int point = 10;
     int coutPiege = 2;
     int coutAllie = 4;
     int PointGagne = 3;
-    //!========================== Fin système de monnaie ============
-    //!=========================== Système de Vague =================
+    //!========================== Fin système de monnaie ==============
+    //!=========================== Système de Vague ===================
     int numeroDeVague =1;
     float dureeEntreChaqueVague = 35./60.;//En minute
     // float dureeEntreChaqueVague = 60./60.;//En minute
@@ -299,14 +300,25 @@ int jeu(SDL_Window *window, parametre *para){
     int nombreDEnnemieRestant = 5;
 
     //!========================== Fin système de Vague ================
-    //----------------------------------------Teste UI----------------
-    ui_liste *l = initList_ui();
-    TTF_Font *font = TTF_OpenFont("data/fonts/roboto.ttf", 2000);
+    //!========================== Chargement GUI ======================
 
-    TTF_CloseFont(font);
-    //---------------------------------------Fin Teste UI--------------
+    SDL_GUI_Police *policeLifeBar = SDL_GUI_InitPolice("data/fonts/roboto.ttf", 15.*para->coefResolution/100., (SDL_Color) {0, 0, 0, 255}, renderer);
 
-    //!========== Pour les unités alliées et les pièges ==========
+    SDL_Surface *backLifeBarS = IMG_Load("data/UI/Jeu/BackLifeBar.png");
+    SDL_Texture* backLifeBarT = SDL_CreateTextureFromSurface(renderer, backLifeBarS);
+    SDL_FreeSurface(backLifeBarS);
+    
+    SDL_Surface *frontLifeBarS = IMG_Load("data/UI/Jeu/FrontLifeBar.png");
+    SDL_Texture* frontLifeBarT = SDL_CreateTextureFromSurface(renderer, frontLifeBarS);
+    SDL_FreeSurface(frontLifeBarS);
+
+    SDL_GUI_ProgressBar* lifeBar = SDL_GUI_InitProgressBar(5.5*para->coefResolution, 0.25*para->coefResolution, 500, 25, renderer, backLifeBarT, frontLifeBarT, SDL_GUI_Progression_LeftToRight);
+    SDL_GUI_SetRatePrintProgressBar(lifeBar, para->coefResolution/100.);
+
+
+
+    //!========================== Fin Chargement GUI ==================
+    //!========== Pour les unités alliées et les pièges ===============
     int indiceUniteAllie = 0;
     argUniteAllie argumentsAllies[1000];
     Entite *unitesAllie[1000];
@@ -319,9 +331,9 @@ int jeu(SDL_Window *window, parametre *para){
     pthread_t threadPiege[1000];
     bool existPiege[1000];
 
-    //!========== Fin des unités alliées et les pièges ==========
+    //!========== Fin des unités alliées et les pièges ================
 
-    //!========== Code de Test ==========
+    //!========== Code de Test ========================================
 
     Entite *nexus = malloc(sizeof(Entite));
 
@@ -420,7 +432,7 @@ int jeu(SDL_Window *window, parametre *para){
     bool *finAffichageVideo = malloc(sizeof(bool));
     //ajouteListeFin(&liste_fin, finAffichageVideo);
     camera cam = initCamera((float) LARGEUR*para->coefResolution/2, HAUTEUR*para->coefResolution/2, zoomMin, LARGEUR*para->coefResolution, HAUTEUR*para->coefResolution);
-    argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, finAffichageVideo, l, listeEntite};
+    argAfficheVideo arg = {&running, para, &cam, renderer, tM, M, finAffichageVideo, listeEntite, lifeBar, nexus};
     pthread_t threadVideo;
     pthread_create(&threadVideo, NULL, afficheVideo, &arg);
   
@@ -513,7 +525,6 @@ int jeu(SDL_Window *window, parametre *para){
                 default:
                 break;
             }
-            eventListe_ui(l, &e);
         }
         else{
             SDL_WaitEvent(&e);
@@ -559,14 +570,11 @@ int jeu(SDL_Window *window, parametre *para){
                 default:
                 break;
             }
-            eventListe_ui(l, &e);
         }
     }
     //Attente de fin d'execution du second thread
     // supprimeListeFin(liste_fin);
     
-
-    freeListe_ui(l);
     freeListeCheminsEnnemis(listeCheminsEnnemis);
     freeGraphe(graphe, *M);
     freeMap(M);

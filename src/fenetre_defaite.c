@@ -7,17 +7,11 @@
 #include "header/entites.h"
 #include "header/texture_entites.h"
 #include "header/graphe.h"
-#include "header/ui.h"
 
 fenetre menuDefaite(SDL_Window *window, parametre *para){
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool running = true;
  
-    ui_liste *l = initList_ui();
-    TTF_Font *font = TTF_OpenFont("data/fonts/roboto.ttf", 2000);
-    initLabel_ui(l, para->coefResolution*LARGEUR/4, 0, para->coefResolution*LARGEUR/2, para->coefResolution*HAUTEUR*3/11, "Poulpy's last stand", renderer, font);
-    initLabel_ui(l, para->coefResolution*LARGEUR/4, para->coefResolution*HAUTEUR/2, para->coefResolution*LARGEUR/2, para->coefResolution*HAUTEUR*3/11, "Defaite", renderer, font);
-    TTF_CloseFont(font);
     SDL_Event e;
 
     while(running){
@@ -28,8 +22,6 @@ fenetre menuDefaite(SDL_Window *window, parametre *para){
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0x00);
         SDL_RenderFillRect(renderer, NULL);
 
-
-        afficherListe_ui(l, renderer);
         SDL_RenderPresent(renderer);
 
         if(SDL_PollEvent(&e)){

@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
             demarage = menuPrincipal(window, &para);
             break;
         case fenetre_parametre:
-            demarage = menuDefaite(window, &para);
+            //demarage = menuDefaite(window, &para);
             demarage = fenetre_sortir;
             break;
         case fenetre_jeu:

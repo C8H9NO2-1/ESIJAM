@@ -34,5 +34,12 @@ all : $(OBJ)
 	@$(CC) $(addprefix bin/$(SE)/, $^) $(FLAGS_E) -o exe/$(SE)/prog
 	@echo Terminé !
 
+start :
+	@echo Lancement du jeu...
+	@echo ============================================================
+	@./exe/$(SE)/prog
+	@echo ============================================================
+	@echo Fin
+
 clean : 
 	@$(clr)
